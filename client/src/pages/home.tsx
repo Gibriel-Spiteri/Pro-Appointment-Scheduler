@@ -467,7 +467,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-5">
+            <div className="grid grid-cols-1 lg:grid-cols-[55fr_45fr] gap-5">
               <div className="space-y-5">
                 <div className="rounded-lg border border-card-border bg-card p-5">
                   <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
