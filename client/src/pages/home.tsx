@@ -384,8 +384,8 @@ export default function Home() {
                   name="customerName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <User className="w-3 h-3" /> Full Name <span className="text-red-500">*</span>
+                      <FormLabel className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5" /> <span className="text-foreground">Full Name</span> <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -404,8 +404,8 @@ export default function Home() {
                   name="businessName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Building2 className="w-3 h-3" /> Business Name <span className="text-red-500">*</span>
+                      <FormLabel className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5" /> <span className="text-foreground">Business Name</span> <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -424,8 +424,8 @@ export default function Home() {
                   name="customerEmail"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Mail className="w-3 h-3" /> Email Address <span className="text-red-500">*</span>
+                      <FormLabel className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5" /> <span className="text-foreground">Email Address</span> <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -445,8 +445,8 @@ export default function Home() {
                   name="customerPhone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Phone className="w-3 h-3" /> Mobile Number <span className="text-red-500">*</span>
+                      <FormLabel className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5" /> <span className="text-foreground">Mobile Number</span> <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
