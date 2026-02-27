@@ -1,0 +1,710 @@
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight, CalendarDays, Clock, MapPin, User, Mail, Phone, FileText, HelpCircle, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { bookAppointmentSchema, type BookAppointment } from "@shared/schema";
+import { cn } from "@/lib/utils";
+
+const LOCATIONS = [
+  "Cabinet Direct",
+  "East Meadow",
+  "Commack",
+  "Franklin Square",
+  "Copiague",
+  "Patchogue",
+];
+
+const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function generateTimeSlots(): string[] {
+  const slots: string[] = [];
+  const start = { h: 8, m: 30 };
+  const end = { h: 19, m: 0 };
+  let h = start.h;
+  let m = start.m;
+  while (h < end.h || (h === end.h && m <= end.m)) {
+    const period = h < 12 ? "AM" : "PM";
+    const displayH = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    slots.push(`${displayH}:${m.toString().padStart(2, "0")} ${period}`);
+    m += 30;
+    if (m >= 60) { m = 0; h++; }
+  }
+  return slots;
+}
+
+const ALL_TIME_SLOTS = generateTimeSlots();
+
+function toLocalDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function timeToMinutes(t: string): number {
+  const [time, period] = t.split(" ");
+  let [h, m] = time.split(":").map(Number);
+  if (period === "PM" && h !== 12) h += 12;
+  if (period === "AM" && h === 12) h = 0;
+  return h * 60 + m;
+}
+
+function addMinutes(t: string, mins: number): string {
+  const total = timeToMinutes(t) + mins;
+  let h = Math.floor(total / 60);
+  const m = total % 60;
+  const period = h < 12 ? "AM" : "PM";
+  if (h > 12) h -= 12;
+  if (h === 0) h = 12;
+  return `${h}:${m.toString().padStart(2, "0")} ${period}`;
+}
+
+function isSlotBooked(slot: string, bookedSlots: { startTime: string; endTime: string }[]): boolean {
+  const slotStart = timeToMinutes(slot);
+  const slotEnd = slotStart + 30;
+  return bookedSlots.some((b) => {
+    const bStart = timeToMinutes(b.startTime);
+    const bEnd = timeToMinutes(b.endTime);
+    return slotStart < bEnd && slotEnd > bStart;
+  });
+}
+
+function CalendarWidget({
+  selectedDate,
+  onDateSelect,
+}: {
+  selectedDate: Date;
+  onDateSelect: (d: Date) => void;
+}) {
+  const [viewDate, setViewDate] = useState(new Date(selectedDate));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  const cells: { day: number; currentMonth: boolean; date: Date }[] = [];
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = prevMonthDays - i;
+    cells.push({ day: d, currentMonth: false, date: new Date(year, month - 1, d) });
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    cells.push({ day: i, currentMonth: true, date: new Date(year, month, i) });
+  }
+  const remaining = 42 - cells.length;
+  for (let i = 1; i <= remaining; i++) {
+    cells.push({ day: i, currentMonth: false, date: new Date(year, month + 1, i) });
+  }
+
+  const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
+
+  return (
+    <div className="select-none">
+      <div className="flex items-center justify-between mb-4">
+        <button
+          data-testid="button-prev-month"
+          onClick={prevMonth}
+          className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <span className="text-sm font-semibold text-foreground">
+          {MONTHS[month]} {year}
+        </span>
+        <button
+          data-testid="button-next-month"
+          onClick={nextMonth}
+          className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="grid grid-cols-7 mb-1">
+        {DAYS.map((d) => (
+          <div key={d} className="text-center text-[10px] font-semibold text-muted-foreground py-1">
+            {d}
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-y-0.5">
+        {cells.map((cell, idx) => {
+          const cellDate = new Date(cell.date);
+          cellDate.setHours(0, 0, 0, 0);
+          const isToday = cellDate.getTime() === today.getTime();
+          const isSelected =
+            selectedDate.getFullYear() === cell.date.getFullYear() &&
+            selectedDate.getMonth() === cell.date.getMonth() &&
+            selectedDate.getDate() === cell.date.getDate();
+          const isPast = cellDate < today;
+
+          return (
+            <button
+              key={idx}
+              data-testid={`button-date-${toLocalDateStr(cell.date)}`}
+              onClick={() => !isPast && cell.currentMonth && onDateSelect(cell.date)}
+              className={cn(
+                "h-8 w-full flex items-center justify-center text-xs rounded-md transition-colors",
+                !cell.currentMonth && "text-muted-foreground/30",
+                cell.currentMonth && isPast && "text-muted-foreground/40 cursor-not-allowed",
+                cell.currentMonth && !isPast && !isSelected && !isToday && "text-foreground hover-elevate cursor-pointer",
+                isToday && !isSelected && "text-primary font-bold",
+                isSelected && "bg-primary text-primary-foreground font-semibold rounded-full",
+              )}
+            >
+              {cell.day}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function TimeSlotGrid({
+  slots,
+  bookedSlots,
+  selectedSlot,
+  duration,
+  onSelect,
+}: {
+  slots: string[];
+  bookedSlots: { startTime: string; endTime: string }[];
+  selectedSlot: string | null;
+  duration: number;
+  onSelect: (slot: string) => void;
+}) {
+  const pairs: [string, string | null][] = [];
+  for (let i = 0; i < slots.length; i += 2) {
+    pairs.push([slots[i], slots[i + 1] ?? null]);
+  }
+
+  const selectedStartMin = selectedSlot ? timeToMinutes(selectedSlot) : null;
+  const selectedEndMin = selectedStartMin !== null ? selectedStartMin + duration : null;
+
+  function getSlotState(slot: string): "available" | "booked" | "selected" | "duration-overlap" {
+    if (isSlotBooked(slot, bookedSlots)) return "booked";
+    if (slot === selectedSlot) return "selected";
+    if (
+      selectedStartMin !== null &&
+      selectedEndMin !== null &&
+      slot !== selectedSlot
+    ) {
+      const slotStart = timeToMinutes(slot);
+      const slotEnd = slotStart + 30;
+      if (slotStart > selectedStartMin && slotStart < selectedEndMin) {
+        return "duration-overlap";
+      }
+    }
+    return "available";
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {pairs.map(([left, right], idx) => (
+        <div key={idx} className="grid grid-cols-2 gap-2">
+          {[left, right].map((slot, si) => {
+            if (!slot) return <div key={si} />;
+            const state = getSlotState(slot);
+            return (
+              <button
+                key={si}
+                data-testid={`button-timeslot-${slot.replace(/[: ]/g, "-")}`}
+                disabled={state === "booked" || state === "duration-overlap"}
+                onClick={() => state === "available" && onSelect(slot)}
+                className={cn(
+                  "relative h-9 flex items-center justify-center text-xs font-medium rounded-md border transition-all",
+                  state === "available" &&
+                    "bg-background border-border text-foreground hover-elevate cursor-pointer",
+                  state === "selected" &&
+                    "bg-green-500 border-green-500 text-white font-semibold",
+                  state === "duration-overlap" &&
+                    "bg-muted/60 border-muted text-muted-foreground cursor-not-allowed",
+                  state === "booked" &&
+                    "cursor-not-allowed border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900/30",
+                )}
+              >
+                {state === "booked" ? (
+                  <span className="relative">
+                    <span className="text-red-400 line-through decoration-red-400 text-[11px]">{slot}</span>
+                    <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+                        <pattern id={`stripe-${idx}-${si}`} width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                          <line x1="0" y1="0" x2="0" y2="4" stroke="#ef4444" strokeWidth="1.5" />
+                        </pattern>
+                        <rect width="100%" height="100%" fill={`url(#stripe-${idx}-${si})`} />
+                      </svg>
+                    </span>
+                  </span>
+                ) : (
+                  <span>{slot}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SuccessScreen({ onBookAnother }: { onBookAnother: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
+      <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
+        <CheckCircle2 className="w-8 h-8 text-green-500" />
+      </div>
+      <h2 className="text-2xl font-semibold text-foreground mb-2">Appointment Confirmed!</h2>
+      <p className="text-muted-foreground mb-8 max-w-sm">
+        Your appointment has been successfully booked. You will receive a confirmation shortly.
+      </p>
+      <Button onClick={onBookAnother} data-testid="button-book-another">
+        Book Another Appointment
+      </Button>
+    </div>
+  );
+}
+
+export default function Home() {
+  const { toast } = useToast();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(today));
+  const [selectedLocation, setSelectedLocation] = useState<string>("Cabinet Direct");
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [duration, setDuration] = useState<number>(60);
+  const [submitted, setSubmitted] = useState(false);
+
+  const form = useForm<BookAppointment>({
+    resolver: zodResolver(bookAppointmentSchema),
+    defaultValues: {
+      customerName: "",
+      customerEmail: "",
+      customerPhone: "",
+      location: "Cabinet Direct",
+      appointmentDate: toLocalDateStr(today),
+      startTime: "",
+      endTime: "",
+      duration: 60,
+      details: "",
+    },
+  });
+
+  const dateStr = toLocalDateStr(selectedDate);
+
+  const { data: availabilityData, isLoading: availabilityLoading } = useQuery<{
+    bookedSlots: { startTime: string; endTime: string }[];
+  }>({
+    queryKey: ["/api/availability", dateStr, selectedLocation],
+    queryFn: () =>
+      fetch(`/api/availability?date=${dateStr}&location=${encodeURIComponent(selectedLocation)}`).then(
+        (r) => r.json()
+      ),
+  });
+
+  const bookedSlots = availabilityData?.bookedSlots ?? [];
+
+  useEffect(() => {
+    form.setValue("location", selectedLocation);
+  }, [selectedLocation]);
+
+  useEffect(() => {
+    form.setValue("appointmentDate", dateStr);
+    setSelectedSlot(null);
+  }, [dateStr]);
+
+  useEffect(() => {
+    if (selectedSlot) {
+      form.setValue("startTime", selectedSlot);
+      form.setValue("endTime", addMinutes(selectedSlot, duration));
+    } else {
+      form.setValue("startTime", "");
+      form.setValue("endTime", "");
+    }
+  }, [selectedSlot, duration]);
+
+  useEffect(() => {
+    form.setValue("duration", duration);
+    if (selectedSlot) {
+      form.setValue("endTime", addMinutes(selectedSlot, duration));
+    }
+  }, [duration]);
+
+  const mutation = useMutation({
+    mutationFn: (data: BookAppointment) => apiRequest("POST", "/api/appointments", data),
+    onSuccess: () => {
+      setSubmitted(true);
+    },
+    onError: () => {
+      toast({
+        title: "Booking failed",
+        description: "An error occurred while booking your appointment. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (data: BookAppointment) => {
+    if (!selectedSlot) {
+      toast({
+        title: "Select a time slot",
+        description: "Please select an available time slot before booking.",
+        variant: "destructive",
+      });
+      return;
+    }
+    mutation.mutate(data);
+  };
+
+  const handleBookAnother = () => {
+    setSubmitted(false);
+    setSelectedSlot(null);
+    setSelectedDate(today);
+    setSelectedLocation("Cabinet Direct");
+    setDuration(60);
+    form.reset();
+  };
+
+  const formatDisplayDate = (d: Date) =>
+    d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <header className="border-b border-border bg-card px-6 py-4">
+          <div className="max-w-6xl mx-auto flex items-center gap-3">
+            <CalendarDays className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-semibold text-foreground">Appointment Scheduler</h1>
+          </div>
+        </header>
+        <div className="flex-1 flex items-center justify-center">
+          <SuccessScreen onBookAnother={handleBookAnother} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="border-b border-border bg-card px-6 py-4 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <CalendarDays className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-semibold text-foreground">Appointment Scheduler</h1>
+          </div>
+          {selectedSlot && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/60 rounded-md px-3 py-1.5">
+              <Clock className="w-3.5 h-3.5 text-green-500" />
+              <span className="font-medium text-foreground">{selectedSlot}</span>
+              <span>on</span>
+              <span className="font-medium text-foreground">{formatDisplayDate(selectedDate)}</span>
+              <span>at</span>
+              <span className="font-medium text-foreground">{selectedLocation}</span>
+            </div>
+          )}
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto w-full px-6 py-6 flex-1">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="rounded-lg border border-card-border bg-card p-5">
+              <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
+                Customer Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="customerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                        <User className="w-3 h-3" /> Full Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="John Smith"
+                          data-testid="input-customer-name"
+                          autoComplete="off"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="customerEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Mail className="w-3 h-3" /> Email Address
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="john@example.com"
+                          data-testid="input-customer-email"
+                          autoComplete="off"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="customerPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Phone className="w-3 h-3" /> Mobile Number
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="tel"
+                          placeholder="(631) 555-0100"
+                          data-testid="input-customer-phone"
+                          autoComplete="off"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_280px] gap-5">
+              <div className="rounded-lg border border-card-border bg-card p-5">
+                <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <CalendarDays className="w-4 h-4 text-primary" />
+                  Select Date
+                </h2>
+                <CalendarWidget
+                  selectedDate={selectedDate}
+                  onDateSelect={(d) => {
+                    setSelectedDate(d);
+                    setSelectedSlot(null);
+                  }}
+                />
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-xs text-muted-foreground text-center">
+                    {formatDisplayDate(selectedDate)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-card-border bg-card p-5">
+                <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary" />
+                  Select Time
+                  {availabilityLoading && (
+                    <span className="ml-auto text-xs text-muted-foreground animate-pulse">
+                      Loading...
+                    </span>
+                  )}
+                </h2>
+
+                <div className="mb-3 flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-3 border border-border rounded-sm bg-background" />
+                    <span>Available</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-3 border border-red-200 rounded-sm bg-red-50 dark:bg-red-950/20" />
+                    <span>Booked</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-3 border border-green-500 rounded-sm bg-green-500" />
+                    <span>Selected</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-3 border border-muted rounded-sm bg-muted/60" />
+                    <span>Duration</span>
+                  </div>
+                </div>
+
+                <TimeSlotGrid
+                  slots={ALL_TIME_SLOTS}
+                  bookedSlots={bookedSlots}
+                  selectedSlot={selectedSlot}
+                  duration={duration}
+                  onSelect={(slot) => setSelectedSlot(selectedSlot === slot ? null : slot)}
+                />
+              </div>
+
+              <div className="space-y-5">
+                <div className="rounded-lg border border-card-border bg-card p-5">
+                  <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-primary" />
+                    Store Location
+                  </h2>
+                  <div className="grid grid-cols-2 gap-2">
+                    {LOCATIONS.map((loc) => (
+                      <button
+                        key={loc}
+                        type="button"
+                        data-testid={`button-location-${loc.replace(/\s+/g, "-").toLowerCase()}`}
+                        onClick={() => {
+                          setSelectedLocation(loc);
+                          setSelectedSlot(null);
+                        }}
+                        className={cn(
+                          "h-9 px-2 text-xs font-medium rounded-md border transition-all text-center leading-tight",
+                          selectedLocation === loc
+                            ? "bg-green-500 border-green-500 text-white"
+                            : "bg-background border-border text-foreground hover-elevate"
+                        )}
+                      >
+                        {loc}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-card-border bg-card p-5 space-y-4">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                      Duration
+                      <span
+                        className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-muted text-[9px] text-muted-foreground cursor-help"
+                        title="Appointment duration in minutes"
+                      >
+                        ?
+                      </span>
+                    </label>
+                    <Input
+                      type="number"
+                      value={duration}
+                      min={30}
+                      max={240}
+                      step={30}
+                      data-testid="input-duration"
+                      onChange={(e) => setDuration(Number(e.target.value))}
+                      className="text-sm"
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="details"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                          <FileText className="w-3 h-3" />
+                          Appointment Details
+                          <span
+                            className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-muted text-[9px] text-muted-foreground cursor-help"
+                            title="Optional notes about the appointment"
+                          >
+                            ?
+                          </span>
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            placeholder="Enter appointment description..."
+                            data-testid="textarea-details"
+                            className="text-sm min-h-[100px] resize-none"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="rounded-lg border border-card-border bg-card p-4">
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-2">Appointment Summary</h3>
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Date</span>
+                      <span className="font-medium text-foreground text-right max-w-[130px]">
+                        {selectedDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Time</span>
+                      <span className="font-medium text-foreground">
+                        {selectedSlot ? `${selectedSlot} – ${addMinutes(selectedSlot, duration)}` : "—"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Location</span>
+                      <span className="font-medium text-foreground text-right max-w-[130px]">{selectedLocation}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Duration</span>
+                      <span className="font-medium text-foreground">{duration} min</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 pb-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                {!selectedSlot && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    Select a time slot to continue
+                  </span>
+                )}
+                {selectedSlot && !form.formState.isValid && (
+                  <span className="flex items-center gap-1 text-amber-500 dark:text-amber-400">
+                    <HelpCircle className="w-3 h-3" />
+                    Please fill in all required fields
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  data-testid="button-cancel"
+                  onClick={handleBookAnother}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  data-testid="button-create-appointment"
+                  disabled={!selectedSlot || mutation.isPending}
+                  className={cn(
+                    "min-w-[160px]",
+                    selectedSlot ? "bg-primary" : "opacity-60"
+                  )}
+                >
+                  {mutation.isPending ? "Booking..." : "Create Appointment"}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </div>
+  );
+}
