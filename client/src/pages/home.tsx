@@ -124,7 +124,7 @@ function CalendarWidget({
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
-        <span className="text-sm font-semibold text-foreground">
+        <span className="text-base font-semibold text-foreground">
           {MONTHS[month]} {year}
         </span>
         <button
