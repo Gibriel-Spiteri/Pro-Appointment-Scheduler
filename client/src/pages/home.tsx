@@ -137,7 +137,7 @@ function CalendarWidget({
       </div>
       <div className="grid grid-cols-7 mb-1">
         {DAYS.map((d) => (
-          <div key={d} className="text-center text-[10px] font-semibold text-muted-foreground py-1">
+          <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-1.5">
             {d}
           </div>
         ))}
@@ -159,7 +159,7 @@ function CalendarWidget({
               data-testid={`button-date-${toLocalDateStr(cell.date)}`}
               onClick={() => !isPast && cell.currentMonth && onDateSelect(cell.date)}
               className={cn(
-                "h-8 w-full flex items-center justify-center text-xs rounded-md transition-colors",
+                "h-10 w-full flex items-center justify-center text-sm rounded-md transition-colors",
                 !cell.currentMonth && "text-muted-foreground/30",
                 cell.currentMonth && isPast && "text-muted-foreground/40 cursor-not-allowed",
                 cell.currentMonth && !isPast && !isSelected && !isToday && "text-foreground hover-elevate cursor-pointer",
