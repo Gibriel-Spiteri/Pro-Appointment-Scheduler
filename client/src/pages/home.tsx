@@ -221,7 +221,7 @@ function TimeSlotGrid({
                 disabled={state === "booked" || state === "duration-overlap"}
                 onClick={() => state === "available" && onSelect(slot)}
                 className={cn(
-                  "relative h-9 flex items-center justify-center text-xs font-medium rounded-md border transition-all",
+                  "relative h-9 flex items-center justify-center text-base font-medium rounded-md border transition-all",
                   state === "available" &&
                     "bg-background border-border text-foreground hover-elevate cursor-pointer",
                   state === "selected" &&
@@ -234,7 +234,7 @@ function TimeSlotGrid({
               >
                 {state === "booked" ? (
                   <span className="relative">
-                    <span className="text-red-400 line-through decoration-red-400 text-[11px]">{slot}</span>
+                    <span className="text-red-400 line-through decoration-red-400 text-sm">{slot}</span>
                     <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
                         <pattern id={`stripe-${idx}-${si}`} width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -501,7 +501,7 @@ export default function Home() {
                           setSelectedSlot(null);
                         }}
                         className={cn(
-                          "h-9 px-2 text-xs font-medium rounded-md border transition-all text-center leading-tight",
+                          "h-9 px-2 text-base font-medium rounded-md border transition-all text-center leading-tight",
                           selectedLocation === loc
                             ? "bg-green-500 border-green-500 text-white"
                             : "bg-background border-border text-foreground hover-elevate"
