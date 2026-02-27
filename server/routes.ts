@@ -31,8 +31,7 @@ export async function registerRoutes(
 
       const appointment = await storage.createAppointment({
         ...parsed.data,
-        duration: parsed.data.duration,
-        details: parsed.data.details ?? null,
+        businessName: parsed.data.businessName ?? null,
       });
 
       res.status(201).json({ success: true, appointment });

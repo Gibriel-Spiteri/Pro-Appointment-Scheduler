@@ -11,6 +11,7 @@ export const users = pgTable("users", {
 export const appointments = pgTable("appointments", {
   id: varchar("id").primaryKey(),
   customerName: text("customer_name").notNull(),
+  businessName: text("business_name"),
   customerEmail: text("customer_email").notNull(),
   customerPhone: text("customer_phone").notNull(),
   location: text("location").notNull(),
@@ -18,7 +19,6 @@ export const appointments = pgTable("appointments", {
   startTime: text("start_time").notNull(),
   endTime: text("end_time").notNull(),
   duration: integer("duration").notNull().default(60),
-  details: text("details"),
   status: text("status").notNull().default("confirmed"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -31,6 +31,7 @@ export const insertAppointmentSchema = createInsertSchema(appointments).omit({
 
 export const bookAppointmentSchema = z.object({
   customerName: z.string().min(2, "Name must be at least 2 characters"),
+  businessName: z.string().optional(),
   customerEmail: z.string().email("Please enter a valid email address"),
   customerPhone: z.string().min(10, "Please enter a valid phone number"),
   location: z.string().min(1, "Please select a location"),
@@ -38,7 +39,6 @@ export const bookAppointmentSchema = z.object({
   startTime: z.string().min(1, "Please select a time slot"),
   endTime: z.string().min(1, "End time is required"),
   duration: z.number().min(30).max(240),
-  details: z.string().optional(),
 });
 
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;

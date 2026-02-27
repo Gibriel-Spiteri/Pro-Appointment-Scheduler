@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, CalendarDays, Clock, MapPin, User, Mail, Phone, FileText, HelpCircle, CheckCircle2 } from "lucide-react";
+import { useLocation } from "wouter";
+import { ChevronLeft, ChevronRight, CalendarDays, Clock, MapPin, User, Mail, Phone, Building2, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -13,7 +13,6 @@ import { bookAppointmentSchema, type BookAppointment } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
 const LOCATIONS = [
-  "Cabinet Direct",
   "East Meadow",
   "Commack",
   "Franklin Square",
@@ -26,6 +25,8 @@ const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
+
+const DURATION = 60;
 
 function generateTimeSlots(): string[] {
   const slots: string[] = [];
@@ -179,13 +180,11 @@ function TimeSlotGrid({
   slots,
   bookedSlots,
   selectedSlot,
-  duration,
   onSelect,
 }: {
   slots: string[];
   bookedSlots: { startTime: string; endTime: string }[];
   selectedSlot: string | null;
-  duration: number;
   onSelect: (slot: string) => void;
 }) {
   const pairs: [string, string | null][] = [];
@@ -194,18 +193,13 @@ function TimeSlotGrid({
   }
 
   const selectedStartMin = selectedSlot ? timeToMinutes(selectedSlot) : null;
-  const selectedEndMin = selectedStartMin !== null ? selectedStartMin + duration : null;
+  const selectedEndMin = selectedStartMin !== null ? selectedStartMin + DURATION : null;
 
   function getSlotState(slot: string): "available" | "booked" | "selected" | "duration-overlap" {
     if (isSlotBooked(slot, bookedSlots)) return "booked";
     if (slot === selectedSlot) return "selected";
-    if (
-      selectedStartMin !== null &&
-      selectedEndMin !== null &&
-      slot !== selectedSlot
-    ) {
+    if (selectedStartMin !== null && selectedEndMin !== null) {
       const slotStart = timeToMinutes(slot);
-      const slotEnd = slotStart + 30;
       if (slotStart > selectedStartMin && slotStart < selectedEndMin) {
         return "duration-overlap";
       }
@@ -262,46 +256,28 @@ function TimeSlotGrid({
   );
 }
 
-function SuccessScreen({ onBookAnother }: { onBookAnother: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-      <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
-        <CheckCircle2 className="w-8 h-8 text-green-500" />
-      </div>
-      <h2 className="text-2xl font-semibold text-foreground mb-2">Appointment Confirmed!</h2>
-      <p className="text-muted-foreground mb-8 max-w-sm">
-        Your appointment has been successfully booked. You will receive a confirmation shortly.
-      </p>
-      <Button onClick={onBookAnother} data-testid="button-book-another">
-        Book Another Appointment
-      </Button>
-    </div>
-  );
-}
-
 export default function Home() {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(today));
-  const [selectedLocation, setSelectedLocation] = useState<string>("Cabinet Direct");
+  const [selectedLocation, setSelectedLocation] = useState<string>("East Meadow");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [duration, setDuration] = useState<number>(60);
-  const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<BookAppointment>({
     resolver: zodResolver(bookAppointmentSchema),
     defaultValues: {
       customerName: "",
+      businessName: "",
       customerEmail: "",
       customerPhone: "",
-      location: "Cabinet Direct",
+      location: "East Meadow",
       appointmentDate: toLocalDateStr(today),
       startTime: "",
       endTime: "",
-      duration: 60,
-      details: "",
+      duration: DURATION,
     },
   });
 
@@ -331,24 +307,27 @@ export default function Home() {
   useEffect(() => {
     if (selectedSlot) {
       form.setValue("startTime", selectedSlot);
-      form.setValue("endTime", addMinutes(selectedSlot, duration));
+      form.setValue("endTime", addMinutes(selectedSlot, DURATION));
     } else {
       form.setValue("startTime", "");
       form.setValue("endTime", "");
     }
-  }, [selectedSlot, duration]);
-
-  useEffect(() => {
-    form.setValue("duration", duration);
-    if (selectedSlot) {
-      form.setValue("endTime", addMinutes(selectedSlot, duration));
-    }
-  }, [duration]);
+  }, [selectedSlot]);
 
   const mutation = useMutation({
     mutationFn: (data: BookAppointment) => apiRequest("POST", "/api/appointments", data),
-    onSuccess: () => {
-      setSubmitted(true);
+    onSuccess: (_res, variables) => {
+      sessionStorage.setItem("lastAppointment", JSON.stringify({
+        customerName: variables.customerName,
+        businessName: variables.businessName || undefined,
+        customerEmail: variables.customerEmail,
+        customerPhone: variables.customerPhone,
+        location: variables.location,
+        appointmentDate: variables.appointmentDate,
+        startTime: variables.startTime,
+        endTime: variables.endTime,
+      }));
+      navigate("/confirmation");
     },
     onError: () => {
       toast({
@@ -371,33 +350,15 @@ export default function Home() {
     mutation.mutate(data);
   };
 
-  const handleBookAnother = () => {
-    setSubmitted(false);
+  const handleCancel = () => {
     setSelectedSlot(null);
-    setSelectedDate(today);
-    setSelectedLocation("Cabinet Direct");
-    setDuration(60);
+    setSelectedDate(new Date(today));
+    setSelectedLocation("East Meadow");
     form.reset();
   };
 
   const formatDisplayDate = (d: Date) =>
     d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <header className="border-b border-border bg-card px-6 py-4">
-          <div className="max-w-6xl mx-auto flex items-center gap-3">
-            <CalendarDays className="w-5 h-5 text-primary" />
-            <h1 className="text-lg font-semibold text-foreground">Appointment Scheduler</h1>
-          </div>
-        </header>
-        <div className="flex-1 flex items-center justify-center">
-          <SuccessScreen onBookAnother={handleBookAnother} />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -428,7 +389,7 @@ export default function Home() {
                 <User className="w-4 h-4 text-primary" />
                 Customer Information
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
                   name="customerName"
@@ -442,6 +403,27 @@ export default function Home() {
                           {...field}
                           placeholder="John Smith"
                           data-testid="input-customer-name"
+                          autoComplete="off"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="businessName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Building2 className="w-3 h-3" /> Business Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Optional"
+                          data-testid="input-business-name"
                           autoComplete="off"
                           className="text-sm"
                         />
@@ -497,66 +479,27 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_280px] gap-5">
-              <div className="rounded-lg border border-card-border bg-card p-5">
-                <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4 text-primary" />
-                  Select Date
-                </h2>
-                <CalendarWidget
-                  selectedDate={selectedDate}
-                  onDateSelect={(d) => {
-                    setSelectedDate(d);
-                    setSelectedSlot(null);
-                  }}
-                />
-                <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-xs text-muted-foreground text-center">
-                    {formatDisplayDate(selectedDate)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-card-border bg-card p-5">
-                <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary" />
-                  Select Time
-                  {availabilityLoading && (
-                    <span className="ml-auto text-xs text-muted-foreground animate-pulse">
-                      Loading...
-                    </span>
-                  )}
-                </h2>
-
-                <div className="mb-3 flex items-center gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-4 h-3 border border-border rounded-sm bg-background" />
-                    <span>Available</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-4 h-3 border border-red-200 rounded-sm bg-red-50 dark:bg-red-950/20" />
-                    <span>Booked</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-4 h-3 border border-green-500 rounded-sm bg-green-500" />
-                    <span>Selected</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-4 h-3 border border-muted rounded-sm bg-muted/60" />
-                    <span>Duration</span>
-                  </div>
-                </div>
-
-                <TimeSlotGrid
-                  slots={ALL_TIME_SLOTS}
-                  bookedSlots={bookedSlots}
-                  selectedSlot={selectedSlot}
-                  duration={duration}
-                  onSelect={(slot) => setSelectedSlot(selectedSlot === slot ? null : slot)}
-                />
-              </div>
-
+            <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-5">
               <div className="space-y-5">
+                <div className="rounded-lg border border-card-border bg-card p-5">
+                  <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4 text-primary" />
+                    Select Date
+                  </h2>
+                  <CalendarWidget
+                    selectedDate={selectedDate}
+                    onDateSelect={(d) => {
+                      setSelectedDate(d);
+                      setSelectedSlot(null);
+                    }}
+                  />
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <p className="text-xs text-muted-foreground text-center">
+                      {formatDisplayDate(selectedDate)}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="rounded-lg border border-card-border bg-card p-5">
                   <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-primary" />
@@ -584,84 +527,40 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
+              </div>
 
-                <div className="rounded-lg border border-card-border bg-card p-5 space-y-4">
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5 mb-1.5">
-                      Duration
-                      <span
-                        className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-muted text-[9px] text-muted-foreground cursor-help"
-                        title="Appointment duration in minutes"
-                      >
-                        ?
-                      </span>
-                    </label>
-                    <Input
-                      type="number"
-                      value={duration}
-                      min={30}
-                      max={240}
-                      step={30}
-                      data-testid="input-duration"
-                      onChange={(e) => setDuration(Number(e.target.value))}
-                      className="text-sm"
-                    />
+              <div className="rounded-lg border border-card-border bg-card p-5">
+                <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary" />
+                  Select Time
+                  {availabilityLoading && (
+                    <span className="ml-auto text-xs text-muted-foreground animate-pulse">
+                      Loading...
+                    </span>
+                  )}
+                </h2>
+
+                <div className="mb-3 flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-3 border border-border rounded-sm bg-background" />
+                    <span>Available</span>
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="details"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                          <FileText className="w-3 h-3" />
-                          Appointment Details
-                          <span
-                            className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-muted text-[9px] text-muted-foreground cursor-help"
-                            title="Optional notes about the appointment"
-                          >
-                            ?
-                          </span>
-                        </FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder="Enter appointment description..."
-                            data-testid="textarea-details"
-                            className="text-sm min-h-[100px] resize-none"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="rounded-lg border border-card-border bg-card p-4">
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-2">Appointment Summary</h3>
-                  <div className="space-y-1.5 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Date</span>
-                      <span className="font-medium text-foreground text-right max-w-[130px]">
-                        {selectedDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Time</span>
-                      <span className="font-medium text-foreground">
-                        {selectedSlot ? `${selectedSlot} – ${addMinutes(selectedSlot, duration)}` : "—"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Location</span>
-                      <span className="font-medium text-foreground text-right max-w-[130px]">{selectedLocation}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Duration</span>
-                      <span className="font-medium text-foreground">{duration} min</span>
-                    </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-3 border border-red-200 rounded-sm bg-red-50 dark:bg-red-950/20" />
+                    <span>Booked</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-3 border border-green-500 rounded-sm bg-green-500" />
+                    <span>Selected</span>
                   </div>
                 </div>
+
+                <TimeSlotGrid
+                  slots={ALL_TIME_SLOTS}
+                  bookedSlots={bookedSlots}
+                  selectedSlot={selectedSlot}
+                  onSelect={(slot) => setSelectedSlot(selectedSlot === slot ? null : slot)}
+                />
               </div>
             </div>
 
@@ -685,7 +584,7 @@ export default function Home() {
                   type="button"
                   variant="outline"
                   data-testid="button-cancel"
-                  onClick={handleBookAnother}
+                  onClick={handleCancel}
                 >
                   Cancel
                 </Button>

@@ -14,36 +14,31 @@ A web-based appointment scheduling application built with React, Express, and Ty
 
 ### Backend (Express)
 - **Server**: Express.js with TypeScript
-- **Storage**: In-memory storage (MemStorage) — ready to swap with PostgreSQL + NetSuite when integration is added
+- **Storage**: In-memory storage (MemStorage)
 - **API Routes**: `/api/availability`, `/api/appointments`
+
+## Pages
+- `/` — Main scheduling page (calendar, time slots, location, customer form)
+- `/confirmation` — Appointment summary shown after successful booking (data passed via sessionStorage)
 
 ## Key Features
 - Interactive calendar for date selection (no past date selection)
 - Time slot grid (8:30 AM – 7:00 PM in 30-min increments, 2 columns)
 - Visual slot states: available, booked (red strikethrough), selected (green), duration-overlap (gray)
-- Location selection: Cabinet Direct, East Meadow, Commack, Franklin Square, Copiague, Patchogue
-- Customer info form: Name, Email, Mobile Number
-- Duration input (30–240 min, 30-min steps)
-- Appointment details textarea
-- Appointment summary panel
-- Confirmation/success screen after booking
+- Location selection (below calendar): East Meadow, Commack, Franklin Square, Copiague, Patchogue
+- Customer info form: Full Name, Business Name (optional), Email, Mobile Number
+- Fixed 60-minute appointment duration
+- Confirmation page with full appointment summary after booking
 
 ## Data Model
-- `appointments` table: customerName, customerEmail, customerPhone, location, appointmentDate, startTime, endTime, duration, details, status
+- `appointments` table: customerName, businessName (optional), customerEmail, customerPhone, location, appointmentDate, startTime, endTime, duration, status
+
+## Layout
+- Customer Information: 4-column grid (Name, Business, Email, Phone)
+- Below: 2-column layout [Left: Calendar + Store Location | Right: Time Slots]
+- Footer: Cancel + Create Appointment buttons
 
 ## Planned NetSuite Integration
 - M2M OAuth2.0 authentication
 - Employee Event data to determine real-time availability
 - Replace mock booked slots with live NetSuite data
-
-## File Structure
-- `client/src/pages/home.tsx` — Main scheduling page (calendar, time slots, location, form)
-- `server/routes.ts` — API endpoints
-- `server/storage.ts` — MemStorage with seed data
-- `shared/schema.ts` — Zod schemas and TypeScript types
-
-## Color Scheme
-- Primary (blue): `210 100% 45%`
-- Selected/Active (green): Tailwind `green-500`
-- Booked (red): Tailwind `red-400/50/200`
-- Background: White / `0 0% 100%`
