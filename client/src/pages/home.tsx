@@ -363,21 +363,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card px-6 py-4 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <CalendarDays className="w-5 h-5 text-primary" />
-            <h1 className="text-lg font-semibold text-foreground">Appointment Scheduler</h1>
-          </div>
-          {selectedSlot && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/60 rounded-md px-3 py-1.5">
-              <Clock className="w-3.5 h-3.5 text-green-500" />
-              <span className="font-medium text-foreground">{selectedSlot}</span>
-              <span>on</span>
-              <span className="font-medium text-foreground">{formatDisplayDate(selectedDate)}</span>
-              <span>at</span>
-              <span className="font-medium text-foreground">{selectedLocation}</span>
-            </div>
-          )}
+        <div className="max-w-6xl mx-auto flex items-center gap-3">
+          <CalendarDays className="w-5 h-5 text-primary" />
+          <h1 className="text-lg font-semibold text-foreground">Appointment Scheduler</h1>
         </div>
       </header>
 
