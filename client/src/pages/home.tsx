@@ -549,20 +549,7 @@ export default function Home() {
             </div>
 
             <div className="flex items-center justify-between pt-2 pb-4">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                {!selectedSlot && (
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    Select a time slot to continue
-                  </span>
-                )}
-                {selectedSlot && !form.formState.isValid && (
-                  <span className="flex items-center gap-1 text-amber-500 dark:text-amber-400">
-                    <HelpCircle className="w-3 h-3" />
-                    Please fill in all required fields
-                  </span>
-                )}
-              </div>
+              <div />
               <div className="flex items-center gap-3">
                 <Button
                   type="button"
