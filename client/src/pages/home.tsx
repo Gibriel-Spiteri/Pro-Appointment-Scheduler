@@ -13,10 +13,10 @@ import { bookAppointmentSchema, type BookAppointment } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
 const LOCATIONS = [
-  "East Meadow",
   "Commack",
-  "Franklin Square",
   "Copiague",
+  "East Meadow",
+  "Franklin Square",
   "Patchogue",
 ];
 
@@ -263,7 +263,7 @@ export default function Home() {
   today.setHours(0, 0, 0, 0);
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(today));
-  const [selectedLocation, setSelectedLocation] = useState<string>("East Meadow");
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
   const form = useForm<BookAppointment>({
@@ -273,7 +273,7 @@ export default function Home() {
       businessName: "",
       customerEmail: "",
       customerPhone: "",
-      location: "East Meadow",
+      location: "",
       appointmentDate: toLocalDateStr(today),
       startTime: "",
       endTime: "",
@@ -291,6 +291,7 @@ export default function Home() {
       fetch(`/api/availability?date=${dateStr}&location=${encodeURIComponent(selectedLocation)}`).then(
         (r) => r.json()
       ),
+    enabled: !!selectedLocation,
   });
 
   const bookedSlots = availabilityData?.bookedSlots ?? [];
@@ -353,7 +354,7 @@ export default function Home() {
   const handleCancel = () => {
     setSelectedSlot(null);
     setSelectedDate(new Date(today));
-    setSelectedLocation("East Meadow");
+    setSelectedLocation("");
     form.reset();
   };
 
