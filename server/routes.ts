@@ -29,10 +29,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
       }
 
-      const appointment = await storage.createAppointment({
-        ...parsed.data,
-        businessName: parsed.data.businessName ?? null,
-      });
+      const appointment = await storage.createAppointment(parsed.data);
 
       res.status(201).json({ success: true, appointment });
     } catch (error) {

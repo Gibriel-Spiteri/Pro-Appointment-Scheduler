@@ -45,7 +45,7 @@ export class MemStorage implements IStorage {
       {
         id: randomUUID(),
         customerName: "Maria Garcia",
-        businessName: null,
+        businessName: "Garcia Designs",
         customerEmail: "maria.garcia@email.com",
         customerPhone: "(631) 555-0202",
         location: "East Meadow",
@@ -73,7 +73,7 @@ export class MemStorage implements IStorage {
       {
         id: randomUUID(),
         customerName: "Lisa Chen",
-        businessName: null,
+        businessName: "Chen Home Studio",
         customerEmail: "lisa.chen@email.com",
         customerPhone: "(631) 555-0404",
         location: "Commack",
@@ -123,7 +123,7 @@ export class MemStorage implements IStorage {
     const appointment: Appointment = {
       ...insertAppointment,
       id,
-      businessName: insertAppointment.businessName ?? null,
+      businessName: insertAppointment.businessName,
       status: "confirmed",
       createdAt: new Date(),
     };

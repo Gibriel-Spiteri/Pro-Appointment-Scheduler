@@ -11,7 +11,7 @@ export const users = pgTable("users", {
 export const appointments = pgTable("appointments", {
   id: varchar("id").primaryKey(),
   customerName: text("customer_name").notNull(),
-  businessName: text("business_name"),
+  businessName: text("business_name").notNull(),
   customerEmail: text("customer_email").notNull(),
   customerPhone: text("customer_phone").notNull(),
   location: text("location").notNull(),
@@ -31,7 +31,7 @@ export const insertAppointmentSchema = createInsertSchema(appointments).omit({
 
 export const bookAppointmentSchema = z.object({
   customerName: z.string().min(2, "Name must be at least 2 characters"),
-  businessName: z.string().optional(),
+  businessName: z.string().min(1, "Business name is required"),
   customerEmail: z.string().email("Please enter a valid email address"),
   customerPhone: z.string().min(10, "Please enter a valid phone number"),
   location: z.string().min(1, "Please select a location"),

@@ -384,7 +384,7 @@ export default function Home() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <User className="w-3 h-3" /> Full Name
+                        <User className="w-3 h-3" /> Full Name <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -395,7 +395,6 @@ export default function Home() {
                           className="text-sm"
                         />
                       </FormControl>
-                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -405,18 +404,17 @@ export default function Home() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Building2 className="w-3 h-3" /> Business Name
+                        <Building2 className="w-3 h-3" /> Business Name <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder="Optional"
+                          placeholder="Company name"
                           data-testid="input-business-name"
                           autoComplete="off"
                           className="text-sm"
                         />
                       </FormControl>
-                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -426,7 +424,7 @@ export default function Home() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Mail className="w-3 h-3" /> Email Address
+                        <Mail className="w-3 h-3" /> Email Address <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -438,7 +436,6 @@ export default function Home() {
                           className="text-sm"
                         />
                       </FormControl>
-                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -448,7 +445,7 @@ export default function Home() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Phone className="w-3 h-3" /> Mobile Number
+                        <Phone className="w-3 h-3" /> Mobile Number <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -460,7 +457,6 @@ export default function Home() {
                           className="text-sm"
                         />
                       </FormControl>
-                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
