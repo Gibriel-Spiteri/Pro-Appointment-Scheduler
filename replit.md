@@ -23,15 +23,25 @@ A web-based appointment scheduling application built with React, Express, and Ty
 
 ## Key Features
 - Interactive calendar for date selection (no past date selection)
-- Time slot grid (8:30 AM – 7:00 PM in 30-min increments, 2 columns)
+- Schedule-driven time slots: available slots are generated from employee schedule data (customrecord_schedule model)
+- Each employee has a location; time slots for a location span from the earliest employee start time to the latest employee end time
+- Employees on PTO are excluded from slot generation; Sundays have no schedules
 - Visual slot states: available, booked (red strikethrough), selected (green), duration-overlap (gray)
-- Location selection (below calendar): East Meadow, Commack, Franklin Square, Copiague, Patchogue
-- Customer info form: Full Name, Business Name (optional), Email, Mobile Number
+- Location selection (below calendar): Commack, Copiague, East Meadow, Franklin Square, Patchogue
+- Customer info form: Full Name, Business Name, Email, Mobile Number
 - Fixed 60-minute appointment duration
 - Confirmation page with full appointment summary after booking
+- Empty state messaging when no location selected or no slots available
 
 ## Data Model
-- `appointments` table: customerName, businessName (optional), customerEmail, customerPhone, location, appointmentDate, startTime, endTime, duration, status
+- `employees` table: id, name, location
+- `employeeSchedules` table: id, employeeId, scheduleDate, startTime, endTime, pto, scheduleChange (mirrors NetSuite customrecord_schedule)
+- `appointments` table: customerName, businessName, customerEmail, customerPhone, location, appointmentDate, startTime, endTime, duration, status
+
+## API
+- `GET /api/availability?date=YYYY-MM-DD&location=Name` — Returns `{ availableSlots: string[], bookedSlots: {startTime, endTime}[] }`
+- `POST /api/appointments` — Creates a new appointment
+- `GET /api/appointments` — Lists all appointments
 
 ## Layout
 - Customer Information: 4-column grid (Name, Business, Email, Phone)
@@ -40,5 +50,6 @@ A web-based appointment scheduling application built with React, Express, and Ty
 
 ## Planned NetSuite Integration
 - M2M OAuth2.0 authentication
-- Employee Event data to determine real-time availability
-- Replace mock booked slots with live NetSuite data
+- Fetch customrecord_schedule records for employee schedules
+- Fetch employee records for location assignments
+- Replace seed data with live NetSuite data

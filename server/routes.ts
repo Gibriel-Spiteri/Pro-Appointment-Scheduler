@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, generateTimeSlotsFromSchedules } from "./storage";
 import { bookAppointmentSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -14,9 +14,14 @@ export async function registerRoutes(
       if (!date || !location) {
         return res.status(400).json({ error: "Date and location are required" });
       }
+
+      const schedules = await storage.getSchedulesByDateAndLocation(date, location);
+      const availableSlots = generateTimeSlotsFromSchedules(schedules);
+
       const appointments = await storage.getAppointmentsByDateAndLocation(date, location);
       const bookedSlots = appointments.map((a) => ({ startTime: a.startTime, endTime: a.endTime }));
-      res.json({ bookedSlots });
+
+      res.json({ availableSlots, bookedSlots });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch availability" });
     }

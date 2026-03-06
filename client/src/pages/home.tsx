@@ -28,24 +28,6 @@ const MONTHS = [
 
 const DURATION = 60;
 
-function generateTimeSlots(): string[] {
-  const slots: string[] = [];
-  const start = { h: 8, m: 30 };
-  const end = { h: 19, m: 0 };
-  let h = start.h;
-  let m = start.m;
-  while (h < end.h || (h === end.h && m <= end.m)) {
-    const period = h < 12 ? "AM" : "PM";
-    const displayH = h > 12 ? h - 12 : h === 0 ? 12 : h;
-    slots.push(`${displayH}:${m.toString().padStart(2, "0")} ${period}`);
-    m += 30;
-    if (m >= 60) { m = 0; h++; }
-  }
-  return slots;
-}
-
-const ALL_TIME_SLOTS = generateTimeSlots();
-
 function toLocalDateStr(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -284,6 +266,7 @@ export default function Home() {
   const dateStr = toLocalDateStr(selectedDate);
 
   const { data: availabilityData, isLoading: availabilityLoading } = useQuery<{
+    availableSlots: string[];
     bookedSlots: { startTime: string; endTime: string }[];
   }>({
     queryKey: ["/api/availability", dateStr, selectedLocation],
@@ -294,6 +277,7 @@ export default function Home() {
     enabled: !!selectedLocation,
   });
 
+  const availableSlots = availabilityData?.availableSlots ?? [];
   const bookedSlots = availabilityData?.bookedSlots ?? [];
 
   useEffect(() => {
@@ -540,12 +524,28 @@ export default function Home() {
                   </div>
                 </div>
 
-                <TimeSlotGrid
-                  slots={ALL_TIME_SLOTS}
-                  bookedSlots={bookedSlots}
-                  selectedSlot={selectedSlot}
-                  onSelect={(slot) => setSelectedSlot(selectedSlot === slot ? null : slot)}
-                />
+                {!selectedLocation ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground" data-testid="text-select-location-prompt">
+                    <MapPin className="w-8 h-8 mb-2 opacity-40" />
+                    <p className="text-sm">Select a location to view available times</p>
+                  </div>
+                ) : availabilityLoading ? (
+                  <div className="flex items-center justify-center py-12" data-testid="text-loading-slots">
+                    <p className="text-sm text-muted-foreground animate-pulse">Loading time slots...</p>
+                  </div>
+                ) : availableSlots.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground" data-testid="text-no-slots">
+                    <Clock className="w-8 h-8 mb-2 opacity-40" />
+                    <p className="text-sm">No available time slots for this date and location</p>
+                  </div>
+                ) : (
+                  <TimeSlotGrid
+                    slots={availableSlots}
+                    bookedSlots={bookedSlots}
+                    selectedSlot={selectedSlot}
+                    onSelect={(slot) => setSelectedSlot(selectedSlot === slot ? null : slot)}
+                  />
+                )}
               </div>
             </div>
 

@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Appointment, type InsertAppointment } from "@shared/schema";
+import { type User, type InsertUser, type Appointment, type InsertAppointment, type Employee, type EmployeeSchedule } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -8,16 +8,121 @@ export interface IStorage {
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
   getAppointmentsByDateAndLocation(date: string, location: string): Promise<Appointment[]>;
   getAllAppointments(): Promise<Appointment[]>;
+  getEmployeesByLocation(location: string): Promise<Employee[]>;
+  getSchedulesByDateAndLocation(date: string, location: string): Promise<EmployeeSchedule[]>;
+}
+
+function timeToMinutes(t: string): number {
+  const [time, period] = t.split(" ");
+  let [h, m] = time.split(":").map(Number);
+  if (period === "PM" && h !== 12) h += 12;
+  if (period === "AM" && h === 12) h = 0;
+  return h * 60 + m;
+}
+
+function minutesToTime(mins: number): string {
+  let h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const period = h < 12 ? "AM" : "PM";
+  if (h > 12) h -= 12;
+  if (h === 0) h = 12;
+  return `${h}:${m.toString().padStart(2, "0")} ${period}`;
+}
+
+export function generateTimeSlotsFromSchedules(schedules: EmployeeSchedule[]): string[] {
+  const activeSchedules = schedules.filter((s) => !s.pto);
+  if (activeSchedules.length === 0) return [];
+
+  let earliestStart = Infinity;
+  let latestEnd = -Infinity;
+  for (const s of activeSchedules) {
+    const start = timeToMinutes(s.startTime);
+    const end = timeToMinutes(s.endTime);
+    if (start < earliestStart) earliestStart = start;
+    if (end > latestEnd) latestEnd = end;
+  }
+
+  const slots: string[] = [];
+  let current = earliestStart;
+  while (current < latestEnd) {
+    slots.push(minutesToTime(current));
+    current += 30;
+  }
+  return slots;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private appointments: Map<string, Appointment>;
+  private employees: Map<string, Employee>;
+  private schedules: Map<string, EmployeeSchedule>;
 
   constructor() {
     this.users = new Map();
     this.appointments = new Map();
+    this.employees = new Map();
+    this.schedules = new Map();
+    this.seedEmployees();
+    this.seedSchedules();
     this.seedAppointments();
+  }
+
+  private seedEmployees() {
+    const emps: Employee[] = [
+      { id: "emp-1", name: "Alice Martinez", location: "East Meadow" },
+      { id: "emp-2", name: "Bob Thompson", location: "East Meadow" },
+      { id: "emp-3", name: "Carol Davis", location: "Commack" },
+      { id: "emp-4", name: "Dan Wilson", location: "Commack" },
+      { id: "emp-5", name: "Eva Brown", location: "Franklin Square" },
+      { id: "emp-6", name: "Frank Lee", location: "Copiague" },
+      { id: "emp-7", name: "Grace Kim", location: "Patchogue" },
+      { id: "emp-8", name: "Henry Nguyen", location: "Patchogue" },
+    ];
+    emps.forEach((e) => this.employees.set(e.id, e));
+  }
+
+  private seedSchedules() {
+    const today = new Date();
+    const dates: string[] = [];
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      dates.push(`${y}-${m}-${day}`);
+    }
+
+    const employeeScheduleTemplates: Record<string, { startTime: string; endTime: string }> = {
+      "emp-1": { startTime: "9:00 AM", endTime: "5:00 PM" },
+      "emp-2": { startTime: "10:00 AM", endTime: "6:00 PM" },
+      "emp-3": { startTime: "8:30 AM", endTime: "4:30 PM" },
+      "emp-4": { startTime: "11:00 AM", endTime: "7:00 PM" },
+      "emp-5": { startTime: "9:00 AM", endTime: "5:00 PM" },
+      "emp-6": { startTime: "10:00 AM", endTime: "6:00 PM" },
+      "emp-7": { startTime: "8:00 AM", endTime: "4:00 PM" },
+      "emp-8": { startTime: "12:00 PM", endTime: "7:00 PM" },
+    };
+
+    for (const date of dates) {
+      for (const [empId, template] of Object.entries(employeeScheduleTemplates)) {
+        const dayOfWeek = new Date(date + "T12:00:00").getDay();
+        if (dayOfWeek === 0) continue;
+
+        const isPto = empId === "emp-2" && date === dates[2];
+
+        const schedule: EmployeeSchedule = {
+          id: randomUUID(),
+          employeeId: empId,
+          scheduleDate: date,
+          startTime: template.startTime,
+          endTime: template.endTime,
+          pto: isPto,
+          scheduleChange: false,
+        };
+        this.schedules.set(schedule.id, schedule);
+      }
+    }
   }
 
   private seedAppointments() {
@@ -139,6 +244,18 @@ export class MemStorage implements IStorage {
 
   async getAllAppointments(): Promise<Appointment[]> {
     return Array.from(this.appointments.values());
+  }
+
+  async getEmployeesByLocation(location: string): Promise<Employee[]> {
+    return Array.from(this.employees.values()).filter((e) => e.location === location);
+  }
+
+  async getSchedulesByDateAndLocation(date: string, location: string): Promise<EmployeeSchedule[]> {
+    const locationEmployees = await this.getEmployeesByLocation(location);
+    const employeeIds = new Set(locationEmployees.map((e) => e.id));
+    return Array.from(this.schedules.values()).filter(
+      (s) => s.scheduleDate === date && employeeIds.has(s.employeeId)
+    );
   }
 }
 
