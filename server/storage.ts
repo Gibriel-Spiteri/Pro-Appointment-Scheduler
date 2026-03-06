@@ -30,7 +30,7 @@ function minutesToTime(mins: number): string {
 }
 
 export function generateTimeSlotsFromSchedules(schedules: EmployeeSchedule[]): string[] {
-  const activeSchedules = schedules.filter((s) => !s.pto);
+  const activeSchedules = schedules.filter((s) => !s.pto && !s.scheduleChange);
   if (activeSchedules.length === 0) return [];
 
   let earliestStart = Infinity;
