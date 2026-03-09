@@ -1,12 +1,16 @@
-import crypto from "crypto";
-import OAuth from "oauth-1.0a";
+import fs from "fs";
+import path from "path";
+import jwt from "jsonwebtoken";
 import { log } from "./index";
 
 const NETSUITE_ACCOUNT_ID = process.env.NETSUITE_ACCOUNT_ID || "";
-const CONSUMER_KEY = process.env.NETSUITE_CONSUMER_KEY || "";
-const CONSUMER_SECRET = process.env.NETSUITE_CONSUMER_SECRET || "";
-const TOKEN_ID = process.env.NETSUITE_TOKEN_ID || "";
-const TOKEN_SECRET = process.env.NETSUITE_TOKEN_SECRET || "";
+const CLIENT_ID = process.env.NETSUITE_CLIENT_ID || "";
+const OIDC_CLIENT_ID = process.env.NETSUITE_OIDC_CLIENT_ID || "";
+const CERTIFICATE_ID = process.env.NETSUITE_CERTIFICATE_ID || process.env.CERTIFICATE_ID || "";
+
+const PRIVATE_KEY_PATH = path.resolve("server/certs/private_key.pem");
+
+let cachedToken: { accessToken: string; expiresAt: number } | null = null;
 
 function extractAccountId(): string {
   let raw = NETSUITE_ACCOUNT_ID.trim();
@@ -22,51 +26,102 @@ function getBaseUrl(): string {
   return `https://${accountId}.suitetalk.api.netsuite.com`;
 }
 
-function getAccountRealm(): string {
-  return extractAccountId().toUpperCase();
+function getTokenEndpoint(): string {
+  return `${getBaseUrl()}/services/rest/auth/oauth2/v1/token`;
 }
 
-function createOAuthClient() {
-  return new OAuth({
-    consumer: {
-      key: CONSUMER_KEY,
-      secret: CONSUMER_SECRET,
-    },
-    signature_method: "HMAC-SHA256",
-    hash_function(baseString: string, key: string) {
-      return crypto.createHmac("sha256", key).update(baseString).digest("base64");
-    },
-    realm: getAccountRealm(),
+function getPrivateKey(): string {
+  return fs.readFileSync(PRIVATE_KEY_PATH, "utf-8");
+}
+
+function getEffectiveClientId(): string {
+  return OIDC_CLIENT_ID || CLIENT_ID;
+}
+
+function createClientAssertion(): string {
+  const privateKey = getPrivateKey();
+  const tokenEndpoint = getTokenEndpoint();
+  const clientId = getEffectiveClientId();
+
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: clientId,
+    scope: ["rest_webservices"],
+    aud: tokenEndpoint,
+    iat: now,
+    exp: now + 3600,
+  };
+
+  log(`Creating JWT with iss=${clientId}, kid=${CERTIFICATE_ID}, alg=PS256`, "netsuite");
+
+  const token = jwt.sign(payload, privateKey, {
+    algorithm: "PS256" as any,
+    header: {
+      alg: "PS256",
+      typ: "JWT",
+      kid: CERTIFICATE_ID,
+    } as any,
   });
+
+  return token;
 }
 
-function buildAuthorizationHeader(method: string, url: string): string {
-  const oauth = createOAuthClient();
-  const requestData = { url, method };
-  const token = { key: TOKEN_ID, secret: TOKEN_SECRET };
-
-  const authHeader = oauth.toHeader(oauth.authorize(requestData, token));
-
-  let headerValue = authHeader.Authorization;
-  if (!headerValue.includes("realm=")) {
-    headerValue = headerValue.replace("OAuth ", `OAuth realm="${getAccountRealm()}", `);
+async function getAccessToken(): Promise<string> {
+  if (cachedToken && Date.now() < cachedToken.expiresAt - 60000) {
+    return cachedToken.accessToken;
   }
 
-  return headerValue;
+  const tokenEndpoint = getTokenEndpoint();
+  const clientAssertion = createClientAssertion();
+
+  log(`Requesting OAuth2 M2M token from ${tokenEndpoint}`, "netsuite");
+
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+    client_assertion: clientAssertion,
+  });
+
+  const response = await fetch(tokenEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body.toString(),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    log(`Token request failed (${response.status}): ${errorBody}`, "netsuite");
+    throw new Error(`Failed to obtain access token (${response.status}): ${errorBody}`);
+  }
+
+  const data = await response.json();
+
+  cachedToken = {
+    accessToken: data.access_token,
+    expiresAt: Date.now() + (data.expires_in || 3600) * 1000,
+  };
+
+  log("Successfully obtained OAuth2 access token", "netsuite");
+  return cachedToken.accessToken;
 }
 
 export function validateNetSuiteConfig(): { valid: boolean; missing: string[] } {
+  const effectiveClientId = getEffectiveClientId();
   const required: Record<string, string> = {
     NETSUITE_ACCOUNT_ID,
-    NETSUITE_CONSUMER_KEY: CONSUMER_KEY,
-    NETSUITE_CONSUMER_SECRET: CONSUMER_SECRET,
-    NETSUITE_TOKEN_ID: TOKEN_ID,
-    NETSUITE_TOKEN_SECRET: TOKEN_SECRET,
+    "NETSUITE_CLIENT_ID or NETSUITE_OIDC_CLIENT_ID": effectiveClientId,
+    NETSUITE_CERTIFICATE_ID: CERTIFICATE_ID,
   };
 
   const missing = Object.entries(required)
     .filter(([, value]) => !value)
     .map(([key]) => key);
+
+  if (!fs.existsSync(PRIVATE_KEY_PATH)) {
+    missing.push("Private Key File (server/certs/private_key.pem)");
+  }
 
   return { valid: missing.length === 0, missing };
 }
@@ -84,20 +139,19 @@ export async function executeSuiteQL(
     };
   }
 
-  const baseUrl = getBaseUrl();
-  const url = `${baseUrl}/services/rest/query/v1/suiteql`;
-  const urlWithParams = `${url}?limit=${limit}&offset=${offset}`;
-
-  const authHeader = buildAuthorizationHeader("POST", url);
-
   try {
-    log(`Executing SuiteQL query against ${urlWithParams}`, "netsuite");
+    const accessToken = await getAccessToken();
+
+    const baseUrl = getBaseUrl();
+    const url = `${baseUrl}/services/rest/query/v1/suiteql?limit=${limit}&offset=${offset}`;
+
+    log(`Executing SuiteQL query against ${url}`, "netsuite");
     log(`Query: ${query.substring(0, 200)}`, "netsuite");
 
-    const response = await fetch(urlWithParams, {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: authHeader,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
         prefer: "transient",
       },
@@ -107,9 +161,26 @@ export async function executeSuiteQL(
     if (!response.ok) {
       const errorBody = await response.text();
       log(`SuiteQL error ${response.status}: ${errorBody}`, "netsuite");
+
+      if (response.status === 401) {
+        cachedToken = null;
+      }
+
+      let sanitizedError = `NetSuite API error (${response.status})`;
+      try {
+        const parsed = JSON.parse(errorBody);
+        if (parsed["o:errorDetails"]?.[0]?.detail) {
+          sanitizedError += `: ${parsed["o:errorDetails"][0].detail}`;
+        } else if (parsed.title) {
+          sanitizedError += `: ${parsed.title}`;
+        }
+      } catch {
+        sanitizedError += `: ${response.statusText}`;
+      }
+
       return {
         success: false,
-        error: `NetSuite API error (${response.status}): ${errorBody}`,
+        error: sanitizedError,
       };
     }
 
