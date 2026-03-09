@@ -6,12 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Confirmation from "@/pages/confirmation";
+import NetSuite from "@/pages/netsuite";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/confirmation" component={Confirmation} />
+      <Route path="/netsuite" component={NetSuite} />
       <Route component={NotFound} />
     </Switch>
   );

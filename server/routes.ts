@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage, generateTimeSlotsFromSchedules } from "./storage";
 import { bookAppointmentSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { testConnection, executeSuiteQL, validateNetSuiteConfig } from "./netsuite";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -48,6 +49,40 @@ export async function registerRoutes(
       res.json({ appointments });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch appointments" });
+    }
+  });
+
+  app.get("/api/netsuite/status", async (_req, res) => {
+    try {
+      const config = validateNetSuiteConfig();
+      res.json({
+        configured: config.valid,
+        missing: config.missing,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to check NetSuite configuration" });
+    }
+  });
+
+  app.post("/api/netsuite/test", async (_req, res) => {
+    try {
+      const result = await testConnection();
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to test NetSuite connection" });
+    }
+  });
+
+  app.post("/api/netsuite/query", async (req, res) => {
+    try {
+      const { query, limit = 1000, offset = 0 } = req.body;
+      if (!query || typeof query !== "string") {
+        return res.status(400).json({ error: "A SuiteQL query string is required" });
+      }
+      const result = await executeSuiteQL(query, limit, offset);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: "Failed to execute SuiteQL query" });
     }
   });
 
