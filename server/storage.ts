@@ -1,5 +1,6 @@
-import { type User, type InsertUser, type Appointment, type InsertAppointment, type Employee, type EmployeeSchedule } from "@shared/schema";
+import { type User, type InsertUser, type Appointment, type InsertAppointment } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { fetchSchedulesByDateAndLocation, fetchLocations, type NetSuiteSchedule, type NetSuiteLocation } from "./netsuite";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -8,8 +9,8 @@ export interface IStorage {
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
   getAppointmentsByDateAndLocation(date: string, location: string): Promise<Appointment[]>;
   getAllAppointments(): Promise<Appointment[]>;
-  getEmployeesByLocation(location: string): Promise<Employee[]>;
-  getSchedulesByDateAndLocation(date: string, location: string): Promise<EmployeeSchedule[]>;
+  getLocations(): Promise<NetSuiteLocation[]>;
+  getSchedulesByDateAndLocation(date: string, locationId: string): Promise<NetSuiteSchedule[]>;
 }
 
 function timeToMinutes(t: string): number {
@@ -29,7 +30,7 @@ function minutesToTime(mins: number): string {
   return `${h}:${m.toString().padStart(2, "0")} ${period}`;
 }
 
-export function generateTimeSlotsFromSchedules(schedules: EmployeeSchedule[]): string[] {
+export function generateTimeSlotsFromSchedules(schedules: NetSuiteSchedule[]): string[] {
   const activeSchedules = schedules.filter((s) => !s.pto && !s.scheduleChange);
   if (activeSchedules.length === 0) return [];
 
@@ -54,158 +55,11 @@ export function generateTimeSlotsFromSchedules(schedules: EmployeeSchedule[]): s
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private appointments: Map<string, Appointment>;
-  private employees: Map<string, Employee>;
-  private schedules: Map<string, EmployeeSchedule>;
+  private locationsCache: { data: NetSuiteLocation[]; expiresAt: number } | null = null;
 
   constructor() {
     this.users = new Map();
     this.appointments = new Map();
-    this.employees = new Map();
-    this.schedules = new Map();
-    this.seedEmployees();
-    this.seedSchedules();
-    this.seedAppointments();
-  }
-
-  private seedEmployees() {
-    const emps: Employee[] = [
-      { id: "emp-1", name: "Alice Martinez", location: "East Meadow" },
-      { id: "emp-2", name: "Bob Thompson", location: "East Meadow" },
-      { id: "emp-3", name: "Carol Davis", location: "Commack" },
-      { id: "emp-4", name: "Dan Wilson", location: "Commack" },
-      { id: "emp-5", name: "Eva Brown", location: "Franklin Square" },
-      { id: "emp-6", name: "Frank Lee", location: "Copiague" },
-      { id: "emp-7", name: "Grace Kim", location: "Patchogue" },
-      { id: "emp-8", name: "Henry Nguyen", location: "Patchogue" },
-    ];
-    emps.forEach((e) => this.employees.set(e.id, e));
-  }
-
-  private seedSchedules() {
-    const today = new Date();
-    const dates: string[] = [];
-    for (let i = 0; i < 30; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      dates.push(`${y}-${m}-${day}`);
-    }
-
-    const employeeScheduleTemplates: Record<string, { startTime: string; endTime: string }> = {
-      "emp-1": { startTime: "9:00 AM", endTime: "5:00 PM" },
-      "emp-2": { startTime: "10:00 AM", endTime: "6:00 PM" },
-      "emp-3": { startTime: "8:30 AM", endTime: "4:30 PM" },
-      "emp-4": { startTime: "11:00 AM", endTime: "7:00 PM" },
-      "emp-5": { startTime: "9:00 AM", endTime: "5:00 PM" },
-      "emp-6": { startTime: "10:00 AM", endTime: "6:00 PM" },
-      "emp-7": { startTime: "8:00 AM", endTime: "4:00 PM" },
-      "emp-8": { startTime: "12:00 PM", endTime: "7:00 PM" },
-    };
-
-    for (const date of dates) {
-      for (const [empId, template] of Object.entries(employeeScheduleTemplates)) {
-        const dayOfWeek = new Date(date + "T12:00:00").getDay();
-        if (dayOfWeek === 0) continue;
-
-        const isPto = empId === "emp-2" && date === dates[2];
-
-        const schedule: EmployeeSchedule = {
-          id: randomUUID(),
-          employeeId: empId,
-          scheduleDate: date,
-          startTime: template.startTime,
-          endTime: template.endTime,
-          pto: isPto,
-          scheduleChange: false,
-        };
-        this.schedules.set(schedule.id, schedule);
-      }
-    }
-  }
-
-  private seedAppointments() {
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, "0");
-    const d = String(today.getDate()).padStart(2, "0");
-    const dateStr = `${y}-${m}-${d}`;
-
-    const seed: Appointment[] = [
-      {
-        id: randomUUID(),
-        customerName: "John Smith",
-        businessName: "Smith Kitchens LLC",
-        customerEmail: "john.smith@email.com",
-        customerPhone: "(631) 555-0101",
-        location: "East Meadow",
-        appointmentDate: dateStr,
-        startTime: "10:00 AM",
-        endTime: "11:00 AM",
-        duration: 60,
-        status: "confirmed",
-        createdAt: new Date(),
-      },
-      {
-        id: randomUUID(),
-        customerName: "Maria Garcia",
-        businessName: "Garcia Designs",
-        customerEmail: "maria.garcia@email.com",
-        customerPhone: "(631) 555-0202",
-        location: "East Meadow",
-        appointmentDate: dateStr,
-        startTime: "10:30 AM",
-        endTime: "11:30 AM",
-        duration: 60,
-        status: "confirmed",
-        createdAt: new Date(),
-      },
-      {
-        id: randomUUID(),
-        customerName: "Robert Johnson",
-        businessName: "Johnson Interiors",
-        customerEmail: "r.johnson@email.com",
-        customerPhone: "(631) 555-0303",
-        location: "East Meadow",
-        appointmentDate: dateStr,
-        startTime: "11:00 AM",
-        endTime: "12:00 PM",
-        duration: 60,
-        status: "confirmed",
-        createdAt: new Date(),
-      },
-      {
-        id: randomUUID(),
-        customerName: "Lisa Chen",
-        businessName: "Chen Home Studio",
-        customerEmail: "lisa.chen@email.com",
-        customerPhone: "(631) 555-0404",
-        location: "Commack",
-        appointmentDate: dateStr,
-        startTime: "9:00 AM",
-        endTime: "10:00 AM",
-        duration: 60,
-        status: "confirmed",
-        createdAt: new Date(),
-      },
-      {
-        id: randomUUID(),
-        customerName: "David Kim",
-        businessName: "Kim & Associates",
-        customerEmail: "d.kim@email.com",
-        customerPhone: "(631) 555-0505",
-        location: "Commack",
-        appointmentDate: dateStr,
-        startTime: "1:00 PM",
-        endTime: "2:00 PM",
-        duration: 60,
-        status: "confirmed",
-        createdAt: new Date(),
-      },
-    ];
-
-    seed.forEach((appt) => this.appointments.set(appt.id, appt));
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -246,16 +100,21 @@ export class MemStorage implements IStorage {
     return Array.from(this.appointments.values());
   }
 
-  async getEmployeesByLocation(location: string): Promise<Employee[]> {
-    return Array.from(this.employees.values()).filter((e) => e.location === location);
+  async getLocations(): Promise<NetSuiteLocation[]> {
+    if (this.locationsCache && Date.now() < this.locationsCache.expiresAt) {
+      return this.locationsCache.data;
+    }
+
+    const locations = await fetchLocations();
+    this.locationsCache = {
+      data: locations,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    };
+    return locations;
   }
 
-  async getSchedulesByDateAndLocation(date: string, location: string): Promise<EmployeeSchedule[]> {
-    const locationEmployees = await this.getEmployeesByLocation(location);
-    const employeeIds = new Set(locationEmployees.map((e) => e.id));
-    return Array.from(this.schedules.values()).filter(
-      (s) => s.scheduleDate === date && employeeIds.has(s.employeeId)
-    );
+  async getSchedulesByDateAndLocation(date: string, locationId: string): Promise<NetSuiteSchedule[]> {
+    return fetchSchedulesByDateAndLocation(date, locationId);
   }
 }
 

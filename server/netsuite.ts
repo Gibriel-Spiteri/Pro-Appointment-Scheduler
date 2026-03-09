@@ -204,6 +204,97 @@ export async function executeSuiteQL(
   }
 }
 
+function parseNetSuiteTime(nsTime: string): string {
+  if (!nsTime) return "";
+  const cleaned = nsTime.trim().toLowerCase();
+  const match = cleaned.match(/^(\d{1,2}):(\d{2})\s*([ap])/);
+  if (!match) return nsTime;
+  const [, hourStr, minStr, ampm] = match;
+  const hour = parseInt(hourStr, 10);
+  const min = minStr;
+  const period = ampm === "a" ? "AM" : "PM";
+  return `${hour}:${min} ${period}`;
+}
+
+function formatDateForSuiteQL(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-");
+  return `${parseInt(m, 10)}/${parseInt(d, 10)}/${y}`;
+}
+
+export interface NetSuiteLocation {
+  id: string;
+  name: string;
+}
+
+export interface NetSuiteSchedule {
+  employeeId: string;
+  scheduleDate: string;
+  startTime: string;
+  endTime: string;
+  pto: boolean;
+  scheduleChange: boolean;
+}
+
+const CUSTOMER_FACING_LOCATION_IDS = [5, 2, 4, 3, 17];
+
+export async function fetchLocations(): Promise<NetSuiteLocation[]> {
+  const locationIds = CUSTOMER_FACING_LOCATION_IDS.join(",");
+  const result = await executeSuiteQL(
+    `SELECT DISTINCT e.location AS id, BUILTIN.DF(e.location) AS name
+     FROM employee e
+     WHERE e.isinactive = 'F' AND e.location IN (${locationIds})
+     ORDER BY name`,
+    100
+  );
+
+  if (!result.success || !result.data) return [];
+
+  return result.data
+    .filter((row: any) => row.name && row.id)
+    .map((row: any) => ({ id: String(row.id), name: String(row.name) }));
+}
+
+export async function fetchSchedulesByDateAndLocation(
+  date: string,
+  locationId: string
+): Promise<NetSuiteSchedule[]> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error(`Invalid date format: ${date}`);
+  }
+  const numericLocationId = parseInt(locationId, 10);
+  if (isNaN(numericLocationId)) {
+    throw new Error(`Invalid location ID: ${locationId}`);
+  }
+  const nsDate = formatDateForSuiteQL(date);
+
+  const result = await executeSuiteQL(
+    `SELECT
+       s.custrecord_sch_employee AS employeeid,
+       s.custrecord_sch_date AS scheduledate,
+       s.custrecord_sch_starttime AS starttime,
+       s.custrecord_sch_endtime AS endtime,
+       s.custrecord_sch_pto AS pto,
+       s.custrecord_sch_change AS schedulechange
+     FROM customrecord_schedule s
+     JOIN employee e ON s.custrecord_sch_employee = e.id
+     WHERE s.custrecord_sch_date = '${nsDate}'
+       AND e.location = ${numericLocationId}
+       AND s.isinactive = 'F'`,
+    1000
+  );
+
+  if (!result.success || !result.data) return [];
+
+  return result.data.map((row: any) => ({
+    employeeId: String(row.employeeid),
+    scheduleDate: date,
+    startTime: parseNetSuiteTime(row.starttime),
+    endTime: parseNetSuiteTime(row.endtime),
+    pto: row.pto === "T",
+    scheduleChange: row.schedulechange === "T",
+  }));
+}
+
 export async function testConnection(): Promise<{
   success: boolean;
   message: string;

@@ -1,7 +1,7 @@
 # Appointment Scheduling Application
 
 ## Overview
-A web-based appointment scheduling application built with React, Express, and TypeScript. Integrates with NetSuite via M2M OAuth2.0 to query live schedule data using SuiteQL.
+A web-based appointment scheduling application built with React, Express, and TypeScript. Integrates with NetSuite via M2M OAuth2.0 to fetch live employee schedule and location data using SuiteQL. No hardcoded seed data — all schedule and location data comes from NetSuite in real time.
 
 ## Architecture
 
@@ -14,23 +14,26 @@ A web-based appointment scheduling application built with React, Express, and Ty
 
 ### Backend (Express)
 - **Server**: Express.js with TypeScript
-- **Storage**: In-memory storage (MemStorage)
-- **API Routes**: `/api/availability`, `/api/appointments`, `/api/netsuite/*`
+- **Storage**: In-memory storage (MemStorage) for appointments only; locations and schedules fetched live from NetSuite
+- **API Routes**: `/api/locations`, `/api/availability`, `/api/appointments`, `/api/netsuite/*`
 - **NetSuite Integration**: OAuth 2.0 M2M with certificate-based JWT (PS256)
 
 ## NetSuite Integration
 - **Auth**: OAuth 2.0 Client Credentials (M2M) flow using PS256-signed JWT
 - **Library**: `jsonwebtoken` for JWT signing
-- **Module**: `server/netsuite.ts` — handles token acquisition, caching, and SuiteQL execution
-- **Certificates**: Stored in `server/certs/` (private_key.pem, certificate.pem)
+- **Module**: `server/netsuite.ts` — handles token acquisition, caching, SuiteQL execution, and live data fetching
+- **Certificates**: Stored in `server/certs/` (private_key.pem, certificate.pem) — gitignored
 - **Env Vars Required**:
   - `NETSUITE_ACCOUNT_ID` — NetSuite account ID (or full URL, auto-parsed)
   - `NETSUITE_OIDC_CLIENT_ID` — OAuth 2.0 Client ID from integration record
   - `NETSUITE_CERTIFICATE_ID` — Certificate ID (kid) from M2M setup
-- **API Endpoints**:
-  - `GET /api/netsuite/status` — Check credential configuration
-  - `POST /api/netsuite/test` — Test live connection to NetSuite
-  - `POST /api/netsuite/query` — Execute SuiteQL queries (`{ query, limit?, offset? }`)
+- **Live Data Functions**:
+  - `fetchLocations()` — Queries employee locations filtered to customer-facing IDs (Commack=5, Copiague=2, East Meadow=4, Franklin Square=3, Patchogue=17); cached 10 min
+  - `fetchSchedulesByDateAndLocation(date, locationId)` — Queries `customrecord_schedule` joined with `employee` for a given date/location
+- **Data Format Conversions**:
+  - Date: App uses "YYYY-MM-DD", NetSuite uses "M/D/YYYY" — converted by `formatDateForSuiteQL()`
+  - Time: App uses "8:30 AM", NetSuite uses "08:30a" — converted by `parseNetSuiteTime()`
+  - Boolean: NetSuite uses "T"/"F" strings for PTO and schedule change flags
 
 ## Pages
 - `/` — Main scheduling page (calendar, time slots, location, customer form)
@@ -39,19 +42,24 @@ A web-based appointment scheduling application built with React, Express, and Ty
 
 ## Key Features
 - Interactive calendar for date selection (no past date selection)
-- Schedule-driven time slots from employee schedule data
-- Location selection: Commack, Copiague, East Meadow, Franklin Square, Patchogue
+- Live schedule-driven time slots from NetSuite employee schedule data
+- Dynamic location loading from NetSuite (filtered to 5 customer-facing stores)
 - Customer info form: Full Name, Business Name, Email, Mobile Number
 - Fixed 60-minute appointment duration
+- Appointments stored in-memory (no NetSuite appointment record)
 - NetSuite SuiteQL query interface for live data access
 
-## Data Model
-- `employees` table: id, name, location
-- `employeeSchedules` table: id, employeeId, scheduleDate, startTime, endTime, pto, scheduleChange
-- `appointments` table: customerName, businessName, customerEmail, customerPhone, location, appointmentDate, startTime, endTime, duration, status
+## Data Flow
+1. Frontend loads locations from `GET /api/locations` (fetched from NetSuite, cached 10 min)
+2. User selects date + location → frontend calls `GET /api/availability?date=YYYY-MM-DD&location=<locationId>`
+3. Backend queries NetSuite for employee schedules at that date/location
+4. Time slots generated from schedule start/end times (30-min intervals, excluding PTO employees)
+5. Booked slots from in-memory appointments subtracted
+6. User selects slot, fills form, submits → `POST /api/appointments`
 
 ## API
-- `GET /api/availability?date=YYYY-MM-DD&location=Name` — Returns available/booked slots
+- `GET /api/locations` — Returns customer-facing locations from NetSuite
+- `GET /api/availability?date=YYYY-MM-DD&location=<locationId>` — Returns available/booked slots (location param is numeric NetSuite ID)
 - `POST /api/appointments` — Creates a new appointment
 - `GET /api/appointments` — Lists all appointments
 - `GET /api/netsuite/status` — NetSuite config status

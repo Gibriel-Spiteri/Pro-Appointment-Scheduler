@@ -12,13 +12,10 @@ import { apiRequest } from "@/lib/queryClient";
 import { bookAppointmentSchema, type BookAppointment } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
-const LOCATIONS = [
-  "Commack",
-  "Copiague",
-  "East Meadow",
-  "Franklin Square",
-  "Patchogue",
-];
+interface Location {
+  id: string;
+  name: string;
+}
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const MONTHS = [
@@ -245,8 +242,17 @@ export default function Home() {
   today.setHours(0, 0, 0, 0);
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(today));
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [selectedLocationId, setSelectedLocationId] = useState<string>("");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+
+  const { data: locationsData, isLoading: locationsLoading } = useQuery<{
+    locations: Location[];
+  }>({
+    queryKey: ["/api/locations"],
+  });
+
+  const locations = locationsData?.locations ?? [];
+  const selectedLocation = locations.find((l) => l.id === selectedLocationId);
 
   const form = useForm<BookAppointment>({
     resolver: zodResolver(bookAppointmentSchema),
@@ -269,20 +275,21 @@ export default function Home() {
     availableSlots: string[];
     bookedSlots: { startTime: string; endTime: string }[];
   }>({
-    queryKey: ["/api/availability", dateStr, selectedLocation],
-    queryFn: () =>
-      fetch(`/api/availability?date=${dateStr}&location=${encodeURIComponent(selectedLocation)}`).then(
-        (r) => r.json()
-      ),
-    enabled: !!selectedLocation,
+    queryKey: ["/api/availability", dateStr, selectedLocationId],
+    queryFn: async () => {
+      const r = await fetch(`/api/availability?date=${dateStr}&location=${encodeURIComponent(selectedLocationId)}`);
+      if (!r.ok) throw new Error("Failed to fetch availability");
+      return r.json();
+    },
+    enabled: !!selectedLocationId,
   });
 
   const availableSlots = availabilityData?.availableSlots ?? [];
   const bookedSlots = availabilityData?.bookedSlots ?? [];
 
   useEffect(() => {
-    form.setValue("location", selectedLocation);
-  }, [selectedLocation]);
+    form.setValue("location", selectedLocation?.name || "");
+  }, [selectedLocationId]);
 
   useEffect(() => {
     form.setValue("appointmentDate", dateStr);
@@ -338,7 +345,7 @@ export default function Home() {
   const handleCancel = () => {
     setSelectedSlot(null);
     setSelectedDate(new Date(today));
-    setSelectedLocation("");
+    setSelectedLocationId("");
     form.reset();
   };
 
@@ -474,27 +481,37 @@ export default function Home() {
                     <MapPin className="w-4 h-4 text-primary" />
                     Store Location
                   </h2>
-                  <div className="grid grid-cols-2 gap-2">
-                    {LOCATIONS.map((loc) => (
-                      <button
-                        key={loc}
-                        type="button"
-                        data-testid={`button-location-${loc.replace(/\s+/g, "-").toLowerCase()}`}
-                        onClick={() => {
-                          setSelectedLocation(loc);
-                          setSelectedSlot(null);
-                        }}
-                        className={cn(
-                          "h-9 px-2 text-[15px] font-medium rounded-md border transition-all text-center leading-tight",
-                          selectedLocation === loc
-                            ? "bg-green-500 border-green-500 text-white"
-                            : "bg-background border-border text-foreground hover-elevate"
-                        )}
-                      >
-                        {loc}
-                      </button>
-                    ))}
-                  </div>
+                  {locationsLoading ? (
+                    <div className="flex items-center justify-center py-6">
+                      <p className="text-sm text-muted-foreground animate-pulse" data-testid="text-loading-locations">Loading locations...</p>
+                    </div>
+                  ) : locations.length === 0 ? (
+                    <div className="flex items-center justify-center py-6">
+                      <p className="text-sm text-muted-foreground" data-testid="text-no-locations">No locations available</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      {locations.map((loc) => (
+                        <button
+                          key={loc.id}
+                          type="button"
+                          data-testid={`button-location-${loc.name.replace(/\s+/g, "-").toLowerCase()}`}
+                          onClick={() => {
+                            setSelectedLocationId(loc.id);
+                            setSelectedSlot(null);
+                          }}
+                          className={cn(
+                            "h-9 px-2 text-[15px] font-medium rounded-md border transition-all text-center leading-tight",
+                            selectedLocationId === loc.id
+                              ? "bg-green-500 border-green-500 text-white"
+                              : "bg-background border-border text-foreground hover-elevate"
+                          )}
+                        >
+                          {loc.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -524,7 +541,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {!selectedLocation ? (
+                {!selectedLocationId ? (
                   <div className="flex flex-col items-center justify-center py-12 text-muted-foreground" data-testid="text-select-location-prompt">
                     <MapPin className="w-8 h-8 mb-2 opacity-40" />
                     <p className="text-sm">Select a location to view available times</p>

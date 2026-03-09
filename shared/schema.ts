@@ -1,4 +1,4 @@
-import { pgTable, text, varchar, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -8,21 +8,6 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
 });
 
-export const employees = pgTable("employees", {
-  id: varchar("id").primaryKey(),
-  name: text("name").notNull(),
-  location: text("location").notNull(),
-});
-
-export const employeeSchedules = pgTable("employee_schedules", {
-  id: varchar("id").primaryKey(),
-  employeeId: varchar("employee_id").notNull(),
-  scheduleDate: text("schedule_date").notNull(),
-  startTime: text("start_time").notNull(),
-  endTime: text("end_time").notNull(),
-  pto: boolean("pto").notNull().default(false),
-  scheduleChange: boolean("schedule_change").notNull().default(false),
-});
 
 export const appointments = pgTable("appointments", {
   id: varchar("id").primaryKey(),
@@ -57,8 +42,7 @@ export const bookAppointmentSchema = z.object({
   duration: z.number().min(30).max(240),
 });
 
-export type Employee = typeof employees.$inferSelect;
-export type EmployeeSchedule = typeof employeeSchedules.$inferSelect;
+
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Appointment = typeof appointments.$inferSelect;
 export type BookAppointment = z.infer<typeof bookAppointmentSchema>;

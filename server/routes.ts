@@ -9,6 +9,15 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  app.get("/api/locations", async (_req, res) => {
+    try {
+      const locations = await storage.getLocations();
+      res.json({ locations });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch locations" });
+    }
+  });
+
   app.get("/api/availability", async (req, res) => {
     try {
       const { date, location } = req.query as { date: string; location: string };
@@ -16,10 +25,21 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Date and location are required" });
       }
 
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD" });
+      }
+      if (!/^\d+$/.test(location)) {
+        return res.status(400).json({ error: "Invalid location ID" });
+      }
+
       const schedules = await storage.getSchedulesByDateAndLocation(date, location);
       const availableSlots = generateTimeSlotsFromSchedules(schedules);
 
-      const appointments = await storage.getAppointmentsByDateAndLocation(date, location);
+      const locations = await storage.getLocations();
+      const loc = locations.find((l) => l.id === location);
+      const locationName = loc?.name || location;
+
+      const appointments = await storage.getAppointmentsByDateAndLocation(date, locationName);
       const bookedSlots = appointments.map((a) => ({ startTime: a.startTime, endTime: a.endTime }));
 
       res.json({ availableSlots, bookedSlots });
