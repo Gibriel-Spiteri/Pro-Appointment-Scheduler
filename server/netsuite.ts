@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import OAuth from "oauth-1.0a";
 import { log } from "./index";
 
 const NETSUITE_ACCOUNT_ID = process.env.NETSUITE_ACCOUNT_ID || "";
@@ -25,80 +26,33 @@ function getAccountRealm(): string {
   return extractAccountId().toUpperCase();
 }
 
-function generateNonce(): string {
-  return crypto.randomBytes(16).toString("hex");
+function createOAuthClient() {
+  return new OAuth({
+    consumer: {
+      key: CONSUMER_KEY,
+      secret: CONSUMER_SECRET,
+    },
+    signature_method: "HMAC-SHA256",
+    hash_function(baseString: string, key: string) {
+      return crypto.createHmac("sha256", key).update(baseString).digest("base64");
+    },
+    realm: getAccountRealm(),
+  });
 }
 
-function generateTimestamp(): string {
-  return Math.floor(Date.now() / 1000).toString();
-}
+function buildAuthorizationHeader(method: string, url: string): string {
+  const oauth = createOAuthClient();
+  const requestData = { url, method };
+  const token = { key: TOKEN_ID, secret: TOKEN_SECRET };
 
-function percentEncode(str: string): string {
-  return encodeURIComponent(str)
-    .replace(/!/g, "%21")
-    .replace(/\*/g, "%2A")
-    .replace(/'/g, "%27")
-    .replace(/\(/g, "%28")
-    .replace(/\)/g, "%29");
-}
+  const authHeader = oauth.toHeader(oauth.authorize(requestData, token));
 
-function generateOAuthSignature(
-  method: string,
-  url: string,
-  params: Record<string, string>,
-  algorithm: "sha1" | "sha256" = "sha256"
-): string {
-  const sortedKeys = Object.keys(params).sort();
-  const paramString = sortedKeys
-    .map((key) => `${percentEncode(key)}=${percentEncode(params[key])}`)
-    .join("&");
+  let headerValue = authHeader.Authorization;
+  if (!headerValue.includes("realm=")) {
+    headerValue = headerValue.replace("OAuth ", `OAuth realm="${getAccountRealm()}", `);
+  }
 
-  const baseString = [
-    method.toUpperCase(),
-    percentEncode(url),
-    percentEncode(paramString),
-  ].join("&");
-
-  const signingKey = `${percentEncode(CONSUMER_SECRET)}&${percentEncode(TOKEN_SECRET)}`;
-
-  const signature = crypto
-    .createHmac(algorithm, signingKey)
-    .update(baseString)
-    .digest("base64");
-
-  return signature;
-}
-
-function buildAuthorizationHeader(
-  method: string,
-  url: string
-): string {
-  const nonce = generateNonce();
-  const timestamp = generateTimestamp();
-
-  const signatureMethod = "HMAC-SHA256";
-  const hashAlgorithm: "sha1" | "sha256" = "sha256";
-
-  const oauthParams: Record<string, string> = {
-    oauth_consumer_key: CONSUMER_KEY,
-    oauth_token: TOKEN_ID,
-    oauth_nonce: nonce,
-    oauth_timestamp: timestamp,
-    oauth_signature_method: signatureMethod,
-    oauth_version: "1.0",
-  };
-
-  const signature = generateOAuthSignature(method, url, oauthParams, hashAlgorithm);
-  oauthParams.oauth_signature = signature;
-
-  const realm = getAccountRealm();
-
-  const headerParts = Object.keys(oauthParams)
-    .sort()
-    .map((key) => `${percentEncode(key)}="${percentEncode(oauthParams[key])}"`)
-    .join(", ");
-
-  return `OAuth realm="${realm}", ${headerParts}`;
+  return headerValue;
 }
 
 export function validateNetSuiteConfig(): { valid: boolean; missing: string[] } {
@@ -138,7 +92,7 @@ export async function executeSuiteQL(
 
   try {
     log(`Executing SuiteQL query against ${urlWithParams}`, "netsuite");
-    log(`Executing SuiteQL query: ${query.substring(0, 100)}...`, "netsuite");
+    log(`Query: ${query.substring(0, 200)}`, "netsuite");
 
     const response = await fetch(urlWithParams, {
       method: "POST",
@@ -168,7 +122,9 @@ export async function executeSuiteQL(
       totalResults: data.totalResults || data.items?.length || 0,
     };
   } catch (error: any) {
-    const errorDetail = error.cause ? `${error.message} (cause: ${error.cause?.message || error.cause})` : error.message;
+    const errorDetail = error.cause
+      ? `${error.message} (cause: ${error.cause?.message || error.cause})`
+      : error.message;
     log(`SuiteQL request failed: ${errorDetail}`, "netsuite");
     return {
       success: false,
@@ -181,6 +137,7 @@ export async function testConnection(): Promise<{
   success: boolean;
   message: string;
   accountId?: string;
+  endpoint?: string;
 }> {
   const config = validateNetSuiteConfig();
   if (!config.valid) {
@@ -197,11 +154,13 @@ export async function testConnection(): Promise<{
       success: true,
       message: "Successfully connected to NetSuite",
       accountId: extractAccountId(),
+      endpoint: getBaseUrl(),
     };
   }
 
   return {
     success: false,
     message: result.error || "Failed to connect to NetSuite",
+    endpoint: getBaseUrl(),
   };
 }
