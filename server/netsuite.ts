@@ -295,6 +295,59 @@ export async function fetchSchedulesByDateAndLocation(
   }));
 }
 
+export interface NetSuiteEvent {
+  eventId: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  organizer: string;
+  storeLocationId: string;
+  status: string;
+}
+
+export async function fetchEventsByDateAndLocation(
+  date: string,
+  locationId: string
+): Promise<NetSuiteEvent[]> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error(`Invalid date format: ${date}`);
+  }
+  const numericLocationId = parseInt(locationId, 10);
+  if (isNaN(numericLocationId)) {
+    throw new Error(`Invalid location ID: ${locationId}`);
+  }
+  const nsDate = formatDateForSuiteQL(date);
+
+  const result = await executeSuiteQL(
+    `SELECT
+       ce.id AS eventid,
+       ce.title AS title,
+       ce.starttime AS starttime,
+       ce.endtime AS endtime,
+       ce.organizer AS organizer,
+       ce.custevent_storeloc AS storelocationid,
+       ce.status AS status
+     FROM calendarevent ce
+     WHERE ce.startdate = '${nsDate}'
+       AND ce.custevent_storeloc = ${numericLocationId}
+       AND ce.status IN ('CONFIRMED')
+       AND ce.custevent_etype NOT IN (10, 12)`,
+    1000
+  );
+
+  if (!result.success || !result.data) return [];
+
+  return result.data.map((row: any) => ({
+    eventId: String(row.eventid),
+    title: String(row.title || ""),
+    startTime: parseNetSuiteTime(row.starttime),
+    endTime: parseNetSuiteTime(row.endtime),
+    organizer: String(row.organizer || ""),
+    storeLocationId: String(row.storelocationid || ""),
+    status: String(row.status || ""),
+  }));
+}
+
 export async function testConnection(): Promise<{
   success: boolean;
   message: string;

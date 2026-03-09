@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage, generateTimeSlotsFromSchedules } from "./storage";
+import { storage, generateTimeSlotsFromSchedules, filterAvailableSlots } from "./storage";
 import { bookAppointmentSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { testConnection, executeSuiteQL, validateNetSuiteConfig } from "./netsuite";
@@ -45,15 +45,23 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Invalid location ID" });
       }
 
-      const schedules = await storage.getSchedulesByDateAndLocation(date, location);
-      const availableSlots = generateTimeSlotsFromSchedules(schedules);
+      const [schedules, events] = await Promise.all([
+        storage.getSchedulesByDateAndLocation(date, location),
+        storage.getEventsByDateAndLocation(date, location),
+      ]);
+      const allSlots = generateTimeSlotsFromSchedules(schedules);
 
       const locations = await storage.getLocations();
       const loc = locations.find((l) => l.id === location);
       const locationName = loc?.name || location;
 
-      const appointments = await storage.getAppointmentsByDateAndLocation(date, locationName);
-      const bookedSlots = appointments.map((a) => ({ startTime: a.startTime, endTime: a.endTime }));
+      const localAppointments = await storage.getAppointmentsByDateAndLocation(date, locationName);
+
+      const blockedSlots = events.map((e) => ({ startTime: e.startTime, endTime: e.endTime }));
+      const localBookedSlots = localAppointments.map((a) => ({ startTime: a.startTime, endTime: a.endTime }));
+      const bookedSlots = [...blockedSlots, ...localBookedSlots];
+
+      const availableSlots = filterAvailableSlots(allSlots, bookedSlots);
 
       res.json({ availableSlots, bookedSlots });
     } catch (error) {

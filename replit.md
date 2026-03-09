@@ -52,11 +52,12 @@ A web-based appointment scheduling application built with React, Express, and Ty
 ## Data Flow & Caching
 1. Frontend loads locations from `GET /api/locations` (fetched from NetSuite, cached 10 min)
 2. On page load and each date change, frontend fires `POST /api/prefetch` with the selected date
-3. Prefetch loads schedules for ALL locations on that date in parallel, cached server-side for 5 min
+3. Prefetch loads schedules AND calendar events for ALL locations on that date in parallel, cached server-side for 5 min
 4. User selects location → `GET /api/availability?date=YYYY-MM-DD&location=<locationId>` returns instantly from cache
 5. Time slots generated from schedule start/end times (30-min intervals, excluding PTO employees)
-6. Booked slots from in-memory appointments subtracted
-7. User selects slot, fills form, submits → `POST /api/appointments`
+6. NetSuite calendar events (CALENDAR_EVENT with status CONFIRMED, excluding event types 10/12) block off overlapping time slots
+7. Local in-memory appointments also block off their time ranges
+8. User selects slot, fills form, submits → `POST /api/appointments`
 
 ## API
 - `GET /api/locations` — Returns customer-facing locations from NetSuite

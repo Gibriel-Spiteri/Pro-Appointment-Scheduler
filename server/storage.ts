@@ -1,6 +1,6 @@
 import { type User, type InsertUser, type Appointment, type InsertAppointment } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { fetchSchedulesByDateAndLocation, fetchLocations, type NetSuiteSchedule, type NetSuiteLocation } from "./netsuite";
+import { fetchSchedulesByDateAndLocation, fetchLocations, fetchEventsByDateAndLocation, type NetSuiteSchedule, type NetSuiteLocation, type NetSuiteEvent } from "./netsuite";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -11,6 +11,7 @@ export interface IStorage {
   getAllAppointments(): Promise<Appointment[]>;
   getLocations(): Promise<NetSuiteLocation[]>;
   getSchedulesByDateAndLocation(date: string, locationId: string): Promise<NetSuiteSchedule[]>;
+  getEventsByDateAndLocation(date: string, locationId: string): Promise<NetSuiteEvent[]>;
   prefetchSchedulesForDate(date: string): Promise<void>;
 }
 
@@ -53,11 +54,30 @@ export function generateTimeSlotsFromSchedules(schedules: NetSuiteSchedule[]): s
   return slots;
 }
 
+export function filterAvailableSlots(
+  allSlots: string[],
+  bookedSlots: { startTime: string; endTime: string }[]
+): string[] {
+  if (bookedSlots.length === 0) return allSlots;
+
+  return allSlots.filter((slot) => {
+    const slotMins = timeToMinutes(slot);
+    const slotEnd = slotMins + 30;
+    return !bookedSlots.some((booked) => {
+      if (!booked.startTime || !booked.endTime) return false;
+      const bookedStart = timeToMinutes(booked.startTime);
+      const bookedEnd = timeToMinutes(booked.endTime);
+      return slotMins < bookedEnd && slotEnd > bookedStart;
+    });
+  });
+}
+
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private appointments: Map<string, Appointment>;
   private locationsCache: { data: NetSuiteLocation[]; expiresAt: number } | null = null;
   private schedulesCache: Map<string, { data: NetSuiteSchedule[]; expiresAt: number }> = new Map();
+  private eventsCache: Map<string, { data: NetSuiteEvent[]; expiresAt: number }> = new Map();
 
   constructor() {
     this.users = new Map();
@@ -130,10 +150,28 @@ export class MemStorage implements IStorage {
     return schedules;
   }
 
+  async getEventsByDateAndLocation(date: string, locationId: string): Promise<NetSuiteEvent[]> {
+    const cacheKey = `events-${date}-${locationId}`;
+    const cached = this.eventsCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      return cached.data;
+    }
+
+    const events = await fetchEventsByDateAndLocation(date, locationId);
+    this.eventsCache.set(cacheKey, {
+      data: events,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+    return events;
+  }
+
   async prefetchSchedulesForDate(date: string): Promise<void> {
     const locations = await this.getLocations();
     await Promise.all(
-      locations.map((loc) => this.getSchedulesByDateAndLocation(date, loc.id))
+      locations.flatMap((loc) => [
+        this.getSchedulesByDateAndLocation(date, loc.id),
+        this.getEventsByDateAndLocation(date, loc.id),
+      ])
     );
   }
 }
