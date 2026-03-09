@@ -294,6 +294,11 @@ export default function Home() {
   useEffect(() => {
     form.setValue("appointmentDate", dateStr);
     setSelectedSlot(null);
+    fetch("/api/prefetch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date: dateStr }),
+    }).catch(() => {});
   }, [dateStr]);
 
   useEffect(() => {

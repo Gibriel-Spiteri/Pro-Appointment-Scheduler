@@ -18,6 +18,19 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/prefetch", async (req, res) => {
+    try {
+      const { date } = req.body;
+      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD" });
+      }
+      storage.prefetchSchedulesForDate(date);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to prefetch" });
+    }
+  });
+
   app.get("/api/availability", async (req, res) => {
     try {
       const { date, location } = req.query as { date: string; location: string };

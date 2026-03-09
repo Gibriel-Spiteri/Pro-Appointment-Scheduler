@@ -49,16 +49,18 @@ A web-based appointment scheduling application built with React, Express, and Ty
 - Appointments stored in-memory (no NetSuite appointment record)
 - NetSuite SuiteQL query interface for live data access
 
-## Data Flow
+## Data Flow & Caching
 1. Frontend loads locations from `GET /api/locations` (fetched from NetSuite, cached 10 min)
-2. User selects date + location → frontend calls `GET /api/availability?date=YYYY-MM-DD&location=<locationId>`
-3. Backend queries NetSuite for employee schedules at that date/location
-4. Time slots generated from schedule start/end times (30-min intervals, excluding PTO employees)
-5. Booked slots from in-memory appointments subtracted
-6. User selects slot, fills form, submits → `POST /api/appointments`
+2. On page load and each date change, frontend fires `POST /api/prefetch` with the selected date
+3. Prefetch loads schedules for ALL locations on that date in parallel, cached server-side for 5 min
+4. User selects location → `GET /api/availability?date=YYYY-MM-DD&location=<locationId>` returns instantly from cache
+5. Time slots generated from schedule start/end times (30-min intervals, excluding PTO employees)
+6. Booked slots from in-memory appointments subtracted
+7. User selects slot, fills form, submits → `POST /api/appointments`
 
 ## API
 - `GET /api/locations` — Returns customer-facing locations from NetSuite
+- `POST /api/prefetch` — Prefetches schedules for all locations on a given date `{ date: "YYYY-MM-DD" }`
 - `GET /api/availability?date=YYYY-MM-DD&location=<locationId>` — Returns available/booked slots (location param is numeric NetSuite ID)
 - `POST /api/appointments` — Creates a new appointment
 - `GET /api/appointments` — Lists all appointments

@@ -11,6 +11,7 @@ export interface IStorage {
   getAllAppointments(): Promise<Appointment[]>;
   getLocations(): Promise<NetSuiteLocation[]>;
   getSchedulesByDateAndLocation(date: string, locationId: string): Promise<NetSuiteSchedule[]>;
+  prefetchSchedulesForDate(date: string): Promise<void>;
 }
 
 function timeToMinutes(t: string): number {
@@ -56,6 +57,7 @@ export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private appointments: Map<string, Appointment>;
   private locationsCache: { data: NetSuiteLocation[]; expiresAt: number } | null = null;
+  private schedulesCache: Map<string, { data: NetSuiteSchedule[]; expiresAt: number }> = new Map();
 
   constructor() {
     this.users = new Map();
@@ -114,7 +116,25 @@ export class MemStorage implements IStorage {
   }
 
   async getSchedulesByDateAndLocation(date: string, locationId: string): Promise<NetSuiteSchedule[]> {
-    return fetchSchedulesByDateAndLocation(date, locationId);
+    const cacheKey = `${date}-${locationId}`;
+    const cached = this.schedulesCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      return cached.data;
+    }
+
+    const schedules = await fetchSchedulesByDateAndLocation(date, locationId);
+    this.schedulesCache.set(cacheKey, {
+      data: schedules,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+    return schedules;
+  }
+
+  async prefetchSchedulesForDate(date: string): Promise<void> {
+    const locations = await this.getLocations();
+    await Promise.all(
+      locations.map((loc) => this.getSchedulesByDateAndLocation(date, loc.id))
+    );
   }
 }
 
