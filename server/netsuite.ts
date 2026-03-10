@@ -558,6 +558,60 @@ export async function createNetSuiteCalendarEvent(params: {
   }
 }
 
+function getRestletBaseUrl(): string {
+  const accountId = extractAccountId().toLowerCase().replace(/_/g, "-");
+  return `https://${accountId}.restlets.api.netsuite.com`;
+}
+
+export async function callRestlet(
+  scriptId: string,
+  deployId: string,
+  method: "GET" | "POST" = "POST",
+  body?: any
+): Promise<{ success: boolean; data?: any; error?: string }> {
+  const config = validateNetSuiteConfig();
+  if (!config.valid) {
+    return { success: false, error: `Missing NetSuite configuration: ${config.missing.join(", ")}` };
+  }
+
+  try {
+    const accessToken = await getAccessToken();
+    const restletUrl = `${getRestletBaseUrl()}/app/site/hosting/restlet.nl?script=${scriptId}&deploy=${deployId}`;
+
+    log(`Calling RESTlet: script=${scriptId}, deploy=${deployId}, method=${method}`, "netsuite");
+
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    };
+
+    const options: RequestInit = { method, headers };
+    if (body && method === "POST") {
+      options.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(restletUrl, options);
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      log(`RESTlet call failed (${response.status}): ${errorBody}`, "netsuite");
+
+      if (response.status === 401) {
+        cachedToken = null;
+      }
+
+      return { success: false, error: `RESTlet error (${response.status}): ${errorBody}` };
+    }
+
+    const data = await response.json();
+    log(`RESTlet call succeeded: script=${scriptId}`, "netsuite");
+    return { success: true, data };
+  } catch (error: any) {
+    log(`RESTlet call failed: ${error.message}`, "netsuite");
+    return { success: false, error: `Request failed: ${error.message}` };
+  }
+}
+
 export async function testConnection(): Promise<{
   success: boolean;
   message: string;

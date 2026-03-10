@@ -121,24 +121,23 @@ export async function registerRoutes(
           log(`Error creating NetSuite calendar event: ${err.message}`, "appointments");
         }
 
-        if (salesperson.email) {
-          try {
-            const emailResult = await sendAppointmentNotification({
-              salespersonEmail: salesperson.email,
-              salespersonName: salesperson.name,
-              customerName: data.customerName,
-              businessName: data.businessName,
-              customerEmail: data.customerEmail,
-              customerPhone: data.customerPhone,
-              location: data.location,
-              appointmentDate: data.appointmentDate,
-              startTime: data.startTime,
-              endTime: data.endTime,
-            });
-            emailSent = emailResult.success;
-          } catch (err: any) {
-            log(`Error sending salesperson email: ${err.message}`, "appointments");
-          }
+        try {
+          const emailResult = await sendAppointmentNotification({
+            salespersonEmail: salesperson.email,
+            salespersonName: salesperson.name,
+            salespersonId: salesperson.id,
+            customerName: data.customerName,
+            businessName: data.businessName,
+            customerEmail: data.customerEmail,
+            customerPhone: data.customerPhone,
+            location: data.location,
+            appointmentDate: data.appointmentDate,
+            startTime: data.startTime,
+            endTime: data.endTime,
+          });
+          emailSent = emailResult.success;
+        } catch (err: any) {
+          log(`Error triggering salesperson email via RESTlet: ${err.message}`, "appointments");
         }
       }
 
