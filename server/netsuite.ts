@@ -322,15 +322,15 @@ export async function fetchEventsByDateAndLocation(
     `SELECT
        ce.id AS eventid,
        ce.title AS title,
-       ce.starttime AS starttime,
-       ce.endtime AS endtime,
+       TO_CHAR(ce.starttime, 'HH:MI AM') AS starttime,
+       TO_CHAR(ce.endtime, 'HH:MI AM') AS endtime,
        ce.organizer AS organizer,
        ce.custevent_storeloc AS storelocationid,
        ce.status AS status
      FROM calendarevent ce
-     WHERE ce.startdate = '${nsDate}'
+     WHERE TRUNC(ce.startdate) = TO_DATE('${nsDate}', 'MM/DD/YYYY')
        AND ce.custevent_storeloc = ${numericLocationId}
-       AND ce.status IN ('CONFIRMED')
+       AND ce.status = 'CONFIRMED'
        AND ce.custevent_etype NOT IN (10, 12)`,
     1000
   );
@@ -340,8 +340,8 @@ export async function fetchEventsByDateAndLocation(
   return result.data.map((row: any) => ({
     eventId: String(row.eventid),
     title: String(row.title || ""),
-    startTime: parseNetSuiteTime(row.starttime),
-    endTime: parseNetSuiteTime(row.endtime),
+    startTime: String(row.starttime || "").trim(),
+    endTime: String(row.endtime || "").trim(),
     organizer: String(row.organizer || ""),
     storeLocationId: String(row.storelocationid || ""),
     status: String(row.status || ""),
