@@ -105,6 +105,10 @@ export class MemStorage implements IStorage {
       ...insertAppointment,
       id,
       businessName: insertAppointment.businessName,
+      locationId: insertAppointment.locationId ?? null,
+      salespersonId: insertAppointment.salespersonId ?? null,
+      salespersonName: insertAppointment.salespersonName ?? null,
+      netsuiteEventId: insertAppointment.netsuiteEventId ?? null,
       status: "confirmed",
       createdAt: new Date(),
     };

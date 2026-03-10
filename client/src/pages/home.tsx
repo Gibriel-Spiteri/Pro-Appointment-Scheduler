@@ -289,6 +289,7 @@ export default function Home() {
 
   useEffect(() => {
     form.setValue("location", selectedLocation?.name || "");
+    form.setValue("locationId", selectedLocationId || "");
   }, [selectedLocationId]);
 
   useEffect(() => {

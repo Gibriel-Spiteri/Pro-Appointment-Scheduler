@@ -30,6 +30,16 @@ A web-based appointment scheduling application built with React, Express, and Ty
 - **Live Data Functions**:
   - `fetchLocations()` — Queries employee locations filtered to customer-facing IDs (Commack=5, Copiague=2, East Meadow=4, Franklin Square=3, Patchogue=17); cached 10 min
   - `fetchSchedulesByDateAndLocation(date, locationId)` — Queries `customrecord_schedule` joined with `employee` for a given date/location
+  - `fetchAvailableEmployeeForSlot(date, locationId, startTime, endTime)` — Finds an available salesperson by checking schedules and existing calendar events
+  - `createNetSuiteCalendarEvent(params)` — Creates a calendar event via NetSuite REST Record API
+  - `fetchEmployeeDetails(employeeId)` — Looks up employee name and email via SuiteQL
+- **Email Module**: `server/email.ts` — Uses nodemailer to send appointment notification emails to salespersons
+- **Email Env Vars** (optional):
+  - `SMTP_HOST` — SMTP server hostname
+  - `SMTP_PORT` — SMTP port (default 587)
+  - `SMTP_USER` — SMTP username
+  - `SMTP_PASS` — SMTP password
+  - `SMTP_FROM` — From address for emails
 - **Data Format Conversions**:
   - Date: App uses "YYYY-MM-DD", NetSuite uses "M/D/YYYY" — converted by `formatDateForSuiteQL()`
   - Time: App uses "8:30 AM", NetSuite uses "08:30a" — converted by `parseNetSuiteTime()`
@@ -46,7 +56,9 @@ A web-based appointment scheduling application built with React, Express, and Ty
 - Dynamic location loading from NetSuite (filtered to 5 customer-facing stores)
 - Customer info form: Full Name, Business Name, Email, Mobile Number
 - Fixed 60-minute appointment duration
-- Appointments stored in-memory (no NetSuite appointment record)
+- **NetSuite Calendar Event creation** — When an appointment is booked, a calendar event is automatically created in NetSuite for the assigned salesperson via the REST Record API
+- **Salesperson auto-assignment** — System finds an available employee at the selected location/time from NetSuite schedules, avoiding conflicts with existing calendar events
+- **Email notification** — Salesperson receives an email notification about the new appointment (requires SMTP configuration)
 - NetSuite SuiteQL query interface for live data access
 
 ## Data Flow & Caching
@@ -58,12 +70,15 @@ A web-based appointment scheduling application built with React, Express, and Ty
 6. NetSuite calendar events (CALENDAR_EVENT with status CONFIRMED, excluding event types 10/12) block off overlapping time slots
 7. Local in-memory appointments also block off their time ranges
 8. User selects slot, fills form, submits → `POST /api/appointments`
+9. Server auto-assigns an available salesperson from NetSuite schedules (avoids employees with conflicting calendar events)
+10. Server creates a NetSuite calendar event via REST Record API (`POST /services/rest/record/v1/calendarEvent`) with title, organizer, date/time, store location
+11. Server sends email notification to salesperson (if SMTP configured via env vars: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`)
 
 ## API
 - `GET /api/locations` — Returns customer-facing locations from NetSuite
 - `POST /api/prefetch` — Prefetches schedules for all locations on a given date `{ date: "YYYY-MM-DD" }`
 - `GET /api/availability?date=YYYY-MM-DD&location=<locationId>` — Returns available/booked slots (location param is numeric NetSuite ID)
-- `POST /api/appointments` — Creates a new appointment
+- `POST /api/appointments` — Creates a new appointment, auto-assigns salesperson, creates NetSuite calendar event, sends email notification
 - `GET /api/appointments` — Lists all appointments
 - `GET /api/netsuite/status` — NetSuite config status
 - `POST /api/netsuite/test` — Test NetSuite connection

@@ -348,6 +348,216 @@ export async function fetchEventsByDateAndLocation(
   }));
 }
 
+export interface EmployeeDetail {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export async function fetchEmployeeDetails(employeeId: string): Promise<EmployeeDetail | null> {
+  const result = await executeSuiteQL(
+    `SELECT e.id, e.entityid || ' ' || e.lastname AS name, e.email
+     FROM employee e
+     WHERE e.id = ${parseInt(employeeId, 10)}`,
+    1
+  );
+  if (!result.success || !result.data || result.data.length === 0) return null;
+  const row = result.data[0];
+  return {
+    id: String(row.id),
+    name: String(row.name || ""),
+    email: String(row.email || ""),
+  };
+}
+
+export async function fetchAvailableEmployeeForSlot(
+  date: string,
+  locationId: string,
+  startTime: string,
+  endTime: string
+): Promise<EmployeeDetail | null> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const numericLocationId = parseInt(locationId, 10);
+  if (isNaN(numericLocationId)) return null;
+  const nsDate = formatDateForSuiteQL(date);
+
+  const scheduledResult = await executeSuiteQL(
+    `SELECT
+       s.custrecord_sch_employee AS employeeid,
+       BUILTIN.DF(s.custrecord_sch_employee) AS employeename,
+       e.email AS email,
+       s.custrecord_sch_starttime AS starttime,
+       s.custrecord_sch_endtime AS endtime
+     FROM customrecord_schedule s
+     JOIN employee e ON s.custrecord_sch_employee = e.id
+     WHERE s.custrecord_sch_date = '${nsDate}'
+       AND e.location = ${numericLocationId}
+       AND s.isinactive = 'F'
+       AND s.custrecord_sch_pto = 'F'
+       AND s.custrecord_sch_change = 'F'`,
+    100
+  );
+
+  if (!scheduledResult.success || !scheduledResult.data || scheduledResult.data.length === 0) {
+    return null;
+  }
+
+  const requestStart = timeToMinutesUtil(startTime);
+  const requestEnd = timeToMinutesUtil(endTime);
+
+  const eligibleEmployees = scheduledResult.data.filter((row: any) => {
+    const schedStart = timeToMinutesUtil(parseNetSuiteTime(row.starttime));
+    const schedEnd = timeToMinutesUtil(parseNetSuiteTime(row.endtime));
+    return requestStart >= schedStart && requestEnd <= schedEnd;
+  });
+
+  if (eligibleEmployees.length === 0) return null;
+
+  const eventsResult = await executeSuiteQL(
+    `SELECT
+       ce.organizer AS organizer,
+       TO_CHAR(ce.starttime, 'HH:MI AM') AS starttime,
+       TO_CHAR(ce.endtime, 'HH:MI AM') AS endtime
+     FROM calendarevent ce
+     WHERE TRUNC(ce.startdate) = TO_DATE('${nsDate}', 'MM/DD/YYYY')
+       AND ce.custevent_storeloc = ${numericLocationId}
+       AND ce.status = 'CONFIRMED'
+       AND ce.custevent_etype NOT IN (10, 12)`,
+    1000
+  );
+
+  const busyEvents = eventsResult.success && eventsResult.data ? eventsResult.data : [];
+
+  for (const emp of eligibleEmployees) {
+    const empId = String(emp.employeeid);
+    const hasConflict = busyEvents.some((evt: any) => {
+      if (String(evt.organizer) !== empId) return false;
+      const evtStart = timeToMinutesUtil(String(evt.starttime || "").trim());
+      const evtEnd = timeToMinutesUtil(String(evt.endtime || "").trim());
+      return requestStart < evtEnd && requestEnd > evtStart;
+    });
+
+    if (!hasConflict) {
+      return {
+        id: empId,
+        name: String(emp.employeename || ""),
+        email: String(emp.email || ""),
+      };
+    }
+  }
+
+  return null;
+}
+
+function timeToMinutesUtil(t: string): number {
+  if (!t) return 0;
+  const [time, period] = t.split(" ");
+  if (!time || !period) return 0;
+  let [h, m] = time.split(":").map(Number);
+  if (period === "PM" && h !== 12) h += 12;
+  if (period === "AM" && h === 12) h = 0;
+  return h * 60 + (m || 0);
+}
+
+function formatTimeForNetSuite(timeStr: string, dateStr: string): string {
+  const mins = timeToMinutesUtil(timeStr);
+  let h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const [y, mo, d] = dateStr.split("-");
+  return `${parseInt(mo, 10)}/${parseInt(d, 10)}/${y} ${h}:${m.toString().padStart(2, "0")}:00`;
+}
+
+export async function createNetSuiteCalendarEvent(params: {
+  title: string;
+  startDate: string;
+  startTime: string;
+  endTime: string;
+  organizerId: string;
+  locationId: string;
+  message?: string;
+}): Promise<{ success: boolean; eventId?: string; error?: string }> {
+  const config = validateNetSuiteConfig();
+  if (!config.valid) {
+    return { success: false, error: `Missing NetSuite configuration: ${config.missing.join(", ")}` };
+  }
+
+  try {
+    const accessToken = await getAccessToken();
+    const baseUrl = getBaseUrl();
+    const url = `${baseUrl}/services/rest/record/v1/calendarEvent`;
+
+    const nsDate = (() => {
+      const [y, m, d] = params.startDate.split("-");
+      return `${parseInt(m, 10)}/${parseInt(d, 10)}/${y}`;
+    })();
+
+    const startDateTime = formatTimeForNetSuite(params.startTime, params.startDate);
+    const endDateTime = formatTimeForNetSuite(params.endTime, params.startDate);
+
+    const eventBody: any = {
+      title: params.title,
+      organizer: { id: params.organizerId },
+      owner: { id: params.organizerId },
+      startDate: nsDate,
+      endDate: nsDate,
+      startTime: startDateTime,
+      endTime: endDateTime,
+      status: "CONFIRMED",
+      customFields: [
+        { scriptId: "custevent_storeloc", value: params.locationId },
+      ],
+    };
+
+    if (params.message) {
+      eventBody.message = params.message;
+    }
+
+    log(`Creating calendar event for organizer ${params.organizerId} on ${params.startDate}`, "netsuite");
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        prefer: "respond-async, return=representation",
+      },
+      body: JSON.stringify(eventBody),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      log(`Calendar event creation failed (${response.status}): ${errorBody}`, "netsuite");
+
+      if (response.status === 401) {
+        cachedToken = null;
+      }
+
+      return { success: false, error: `Failed to create calendar event (${response.status}): ${errorBody}` };
+    }
+
+    const locationHeader = response.headers.get("Location");
+    let eventId: string | undefined;
+    if (locationHeader) {
+      const match = locationHeader.match(/\/(\d+)$/);
+      if (match) eventId = match[1];
+    }
+
+    if (!eventId) {
+      try {
+        const data = await response.json();
+        eventId = data.id ? String(data.id) : undefined;
+      } catch {
+      }
+    }
+
+    log(`Calendar event created successfully. Event ID: ${eventId || "unknown"}`, "netsuite");
+    return { success: true, eventId };
+  } catch (error: any) {
+    log(`Calendar event creation request failed: ${error.message}`, "netsuite");
+    return { success: false, error: `Request failed: ${error.message}` };
+  }
+}
+
 export async function testConnection(): Promise<{
   success: boolean;
   message: string;

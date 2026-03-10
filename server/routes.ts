@@ -3,7 +3,9 @@ import { createServer, type Server } from "http";
 import { storage, generateTimeSlotsFromSchedules, filterAvailableSlots } from "./storage";
 import { bookAppointmentSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { testConnection, executeSuiteQL, validateNetSuiteConfig } from "./netsuite";
+import { testConnection, executeSuiteQL, validateNetSuiteConfig, fetchAvailableEmployeeForSlot, createNetSuiteCalendarEvent } from "./netsuite";
+import { sendAppointmentNotification } from "./email";
+import { log } from "./index";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -74,10 +76,89 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
       }
 
-      const appointment = await storage.createAppointment(parsed.data);
+      const data = parsed.data;
 
-      res.status(201).json({ success: true, appointment });
-    } catch (error) {
+      let salesperson: { id: string; name: string; email: string } | null = null;
+      let netsuiteEventId: string | undefined;
+      let emailSent = false;
+
+      const locationId = data.locationId || "";
+
+      if (locationId) {
+        try {
+          salesperson = await fetchAvailableEmployeeForSlot(
+            data.appointmentDate,
+            locationId,
+            data.startTime,
+            data.endTime
+          );
+        } catch (err: any) {
+          log(`Failed to find available salesperson: ${err.message}`, "appointments");
+        }
+      }
+
+      if (salesperson) {
+        try {
+          const eventMessage = `Customer: ${data.customerName}\nBusiness: ${data.businessName}\nEmail: ${data.customerEmail}\nPhone: ${data.customerPhone}`;
+
+          const eventResult = await createNetSuiteCalendarEvent({
+            title: data.customerName,
+            startDate: data.appointmentDate,
+            startTime: data.startTime,
+            endTime: data.endTime,
+            organizerId: salesperson.id,
+            locationId: locationId,
+            message: eventMessage,
+          });
+
+          if (eventResult.success) {
+            netsuiteEventId = eventResult.eventId;
+            log(`NetSuite calendar event created: ${netsuiteEventId}`, "appointments");
+          } else {
+            log(`NetSuite calendar event creation failed: ${eventResult.error}`, "appointments");
+          }
+        } catch (err: any) {
+          log(`Error creating NetSuite calendar event: ${err.message}`, "appointments");
+        }
+
+        if (salesperson.email) {
+          try {
+            const emailResult = await sendAppointmentNotification({
+              salespersonEmail: salesperson.email,
+              salespersonName: salesperson.name,
+              customerName: data.customerName,
+              businessName: data.businessName,
+              customerEmail: data.customerEmail,
+              customerPhone: data.customerPhone,
+              location: data.location,
+              appointmentDate: data.appointmentDate,
+              startTime: data.startTime,
+              endTime: data.endTime,
+            });
+            emailSent = emailResult.success;
+          } catch (err: any) {
+            log(`Error sending salesperson email: ${err.message}`, "appointments");
+          }
+        }
+      }
+
+      const appointment = await storage.createAppointment({
+        ...data,
+        salespersonId: salesperson?.id,
+        salespersonName: salesperson?.name,
+        netsuiteEventId,
+        locationId,
+      });
+
+      res.status(201).json({
+        success: true,
+        appointment,
+        calendarEventCreated: !!netsuiteEventId,
+        emailSent,
+        salesperson: salesperson ? { id: salesperson.id, name: salesperson.name } : null,
+      });
+    } catch (error: any) {
+      log(`Failed to create appointment: ${error.message}`, "appointments");
       res.status(500).json({ error: "Failed to create appointment" });
     }
   });
