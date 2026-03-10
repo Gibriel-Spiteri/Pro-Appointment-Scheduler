@@ -61,9 +61,7 @@ export async function registerRoutes(
       const localBookedSlots = localAppointments.map((a) => ({ startTime: a.startTime, endTime: a.endTime }));
       const bookedSlots = [...blockedSlots, ...localBookedSlots];
 
-      const availableSlots = filterAvailableSlots(allSlots, bookedSlots);
-
-      res.json({ availableSlots, bookedSlots });
+      res.json({ availableSlots: allSlots, bookedSlots });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch availability" });
     }
