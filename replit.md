@@ -33,11 +33,11 @@ A web-based appointment scheduling application built with React, Express, and Ty
   - `fetchAvailableEmployeeForSlot(date, locationId, startTime, endTime)` — Finds an available salesperson by checking schedules and existing calendar events
   - `createNetSuiteCalendarEvent(params)` — Creates a calendar event via NetSuite REST Record API
   - `fetchEmployeeDetails(employeeId)` — Looks up employee name and email via SuiteQL
-- **Email Module**: `server/email.ts` — Triggers a NetSuite RESTlet to send appointment notification emails to salespersons (uses N/email within NetSuite)
+- **Appointment RESTlet Module**: `server/email.ts` — Calls a single NetSuite RESTlet that both creates the calendar event (using N/record) and sends the email notification (using N/email)
 - **RESTlet Integration**: `callRestlet(scriptId, deployId, method, body)` in `server/netsuite.ts` — Generic function for calling any NetSuite RESTlet using OAuth2 M2M auth
-- **Email RESTlet Env Vars** (optional):
-  - `EMAIL_RESTLET_SCRIPT_ID` — Script ID of the email-sending RESTlet in NetSuite
-  - `EMAIL_RESTLET_DEPLOY_ID` — Deployment ID of the email-sending RESTlet in NetSuite
+- **Appointment RESTlet Env Vars** (required for calendar event + email):
+  - `APPOINTMENT_RESTLET_SCRIPT_ID` — Script ID of the appointment RESTlet in NetSuite
+  - `APPOINTMENT_RESTLET_DEPLOY_ID` — Deployment ID of the appointment RESTlet in NetSuite
 - **Data Format Conversions**:
   - Date: App uses "YYYY-MM-DD", NetSuite uses "M/D/YYYY" — converted by `formatDateForSuiteQL()`
   - Time: App uses "8:30 AM", NetSuite uses "08:30a" — converted by `parseNetSuiteTime()`
@@ -69,8 +69,7 @@ A web-based appointment scheduling application built with React, Express, and Ty
 7. Local in-memory appointments also block off their time ranges
 8. User selects slot, fills form, submits → `POST /api/appointments`
 9. Server auto-assigns an available salesperson from NetSuite schedules (avoids employees with conflicting calendar events)
-10. Server creates a NetSuite calendar event via REST Record API (`POST /services/rest/record/v1/calendarEvent`) with title, organizer, date/time, store location
-11. Server triggers a NetSuite RESTlet to send email notification to salesperson (if `EMAIL_RESTLET_SCRIPT_ID` and `EMAIL_RESTLET_DEPLOY_ID` configured)
+10. Server calls a single NetSuite RESTlet that creates the calendar event and sends the salesperson an email notification (if `APPOINTMENT_RESTLET_SCRIPT_ID` and `APPOINTMENT_RESTLET_DEPLOY_ID` configured)
 
 ## API
 - `GET /api/locations` — Returns customer-facing locations from NetSuite

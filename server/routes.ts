@@ -3,8 +3,8 @@ import { createServer, type Server } from "http";
 import { storage, generateTimeSlotsFromSchedules, filterAvailableSlots } from "./storage";
 import { bookAppointmentSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { testConnection, executeSuiteQL, validateNetSuiteConfig, fetchAvailableEmployeeForSlot, createNetSuiteCalendarEvent } from "./netsuite";
-import { sendAppointmentNotification } from "./email";
+import { testConnection, executeSuiteQL, validateNetSuiteConfig, fetchAvailableEmployeeForSlot } from "./netsuite";
+import { createAppointmentViaRestlet } from "./email";
 import { log } from "./index";
 
 export async function registerRoutes(
@@ -99,45 +99,30 @@ export async function registerRoutes(
 
       if (salesperson) {
         try {
-          const eventMessage = `Customer: ${data.customerName}\nBusiness: ${data.businessName}\nEmail: ${data.customerEmail}\nPhone: ${data.customerPhone}`;
-
-          const eventResult = await createNetSuiteCalendarEvent({
-            title: data.customerName,
-            startDate: data.appointmentDate,
-            startTime: data.startTime,
-            endTime: data.endTime,
-            organizerId: salesperson.id,
-            locationId: locationId,
-            message: eventMessage,
-          });
-
-          if (eventResult.success) {
-            netsuiteEventId = eventResult.eventId;
-            log(`NetSuite calendar event created: ${netsuiteEventId}`, "appointments");
-          } else {
-            log(`NetSuite calendar event creation failed: ${eventResult.error}`, "appointments");
-          }
-        } catch (err: any) {
-          log(`Error creating NetSuite calendar event: ${err.message}`, "appointments");
-        }
-
-        try {
-          const emailResult = await sendAppointmentNotification({
+          const restletResult = await createAppointmentViaRestlet({
+            salespersonId: salesperson.id,
             salespersonEmail: salesperson.email,
             salespersonName: salesperson.name,
-            salespersonId: salesperson.id,
             customerName: data.customerName,
             businessName: data.businessName,
             customerEmail: data.customerEmail,
             customerPhone: data.customerPhone,
             location: data.location,
+            locationId: locationId,
             appointmentDate: data.appointmentDate,
             startTime: data.startTime,
             endTime: data.endTime,
           });
-          emailSent = emailResult.success;
+
+          if (restletResult.success) {
+            netsuiteEventId = restletResult.eventId;
+            emailSent = restletResult.emailSent || false;
+            log(`Appointment RESTlet completed — eventId: ${netsuiteEventId}, emailSent: ${emailSent}`, "appointments");
+          } else {
+            log(`Appointment RESTlet failed: ${restletResult.error}`, "appointments");
+          }
         } catch (err: any) {
-          log(`Error triggering salesperson email via RESTlet: ${err.message}`, "appointments");
+          log(`Error calling appointment RESTlet: ${err.message}`, "appointments");
         }
       }
 

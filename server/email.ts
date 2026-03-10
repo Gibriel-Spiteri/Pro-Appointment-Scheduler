@@ -1,56 +1,60 @@
 import { callRestlet } from "./netsuite";
 import { log } from "./index";
 
-const EMAIL_RESTLET_SCRIPT_ID = process.env.EMAIL_RESTLET_SCRIPT_ID || "";
-const EMAIL_RESTLET_DEPLOY_ID = process.env.EMAIL_RESTLET_DEPLOY_ID || "";
+const APPOINTMENT_RESTLET_SCRIPT_ID = process.env.APPOINTMENT_RESTLET_SCRIPT_ID || "";
+const APPOINTMENT_RESTLET_DEPLOY_ID = process.env.APPOINTMENT_RESTLET_DEPLOY_ID || "";
 
-export function isEmailRestletConfigured(): boolean {
-  return !!(EMAIL_RESTLET_SCRIPT_ID && EMAIL_RESTLET_DEPLOY_ID);
+export function isAppointmentRestletConfigured(): boolean {
+  return !!(APPOINTMENT_RESTLET_SCRIPT_ID && APPOINTMENT_RESTLET_DEPLOY_ID);
 }
 
-export async function sendAppointmentNotification(params: {
+export async function createAppointmentViaRestlet(params: {
+  salespersonId: string;
   salespersonEmail: string;
   salespersonName: string;
-  salespersonId: string;
   customerName: string;
   businessName: string;
   customerEmail: string;
   customerPhone: string;
   location: string;
+  locationId: string;
   appointmentDate: string;
   startTime: string;
   endTime: string;
-}): Promise<{ success: boolean; error?: string }> {
-  if (!isEmailRestletConfigured()) {
-    log("Email RESTlet not configured — skipping email notification. Set EMAIL_RESTLET_SCRIPT_ID and EMAIL_RESTLET_DEPLOY_ID environment variables.", "email");
-    return { success: false, error: "Email RESTlet not configured" };
+}): Promise<{ success: boolean; eventId?: string; emailSent?: boolean; error?: string }> {
+  if (!isAppointmentRestletConfigured()) {
+    log("Appointment RESTlet not configured — skipping calendar event and email. Set APPOINTMENT_RESTLET_SCRIPT_ID and APPOINTMENT_RESTLET_DEPLOY_ID environment variables.", "restlet");
+    return { success: false, error: "Appointment RESTlet not configured" };
   }
 
   try {
-    const result = await callRestlet(EMAIL_RESTLET_SCRIPT_ID, EMAIL_RESTLET_DEPLOY_ID, "POST", {
-      action: "sendAppointmentEmail",
-      recipientEmployeeId: params.salespersonId,
-      recipientEmail: params.salespersonEmail,
-      recipientName: params.salespersonName,
+    const result = await callRestlet(APPOINTMENT_RESTLET_SCRIPT_ID, APPOINTMENT_RESTLET_DEPLOY_ID, "POST", {
+      action: "createAppointment",
+      salespersonId: params.salespersonId,
+      salespersonEmail: params.salespersonEmail,
+      salespersonName: params.salespersonName,
       customerName: params.customerName,
       businessName: params.businessName,
       customerEmail: params.customerEmail,
       customerPhone: params.customerPhone,
       location: params.location,
+      locationId: params.locationId,
       appointmentDate: params.appointmentDate,
       startTime: params.startTime,
       endTime: params.endTime,
     });
 
     if (result.success) {
-      log(`Email notification triggered via RESTlet for ${params.salespersonEmail}`, "email");
-      return { success: true };
+      const eventId = result.data?.eventId ? String(result.data.eventId) : undefined;
+      const emailSent = result.data?.emailSent === true;
+      log(`Appointment RESTlet succeeded — eventId: ${eventId || "none"}, emailSent: ${emailSent}`, "restlet");
+      return { success: true, eventId, emailSent };
     } else {
-      log(`RESTlet email notification failed: ${result.error}`, "email");
+      log(`Appointment RESTlet failed: ${result.error}`, "restlet");
       return { success: false, error: result.error };
     }
   } catch (error: any) {
-    log(`Error calling email RESTlet: ${error.message}`, "email");
+    log(`Error calling appointment RESTlet: ${error.message}`, "restlet");
     return { success: false, error: error.message };
   }
 }
