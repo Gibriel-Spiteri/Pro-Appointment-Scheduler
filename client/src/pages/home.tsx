@@ -95,13 +95,13 @@ function CalendarWidget({
 
   return (
     <div className="select-none">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-3">
         <button
           data-testid="button-prev-month"
           onClick={prevMonth}
-          className="w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
+          className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
         >
-          <ChevronLeft className="w-3.5 h-3.5" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
         <span className="text-sm font-semibold text-foreground">
           {MONTHS[month]} {year}
@@ -109,14 +109,14 @@ function CalendarWidget({
         <button
           data-testid="button-next-month"
           onClick={nextMonth}
-          className="w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
+          className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
         >
-          <ChevronRight className="w-3.5 h-3.5" />
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
-      <div className="grid grid-cols-7 mb-0.5">
+      <div className="grid grid-cols-7 mb-1">
         {DAYS.map((d) => (
-          <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-1">
+          <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-1.5">
             {d}
           </div>
         ))}
@@ -138,7 +138,7 @@ function CalendarWidget({
               data-testid={`button-date-${toLocalDateStr(cell.date)}`}
               onClick={() => !isPast && cell.currentMonth && onDateSelect(cell.date)}
               className={cn(
-                "h-8 w-full flex items-center justify-center text-sm rounded-md transition-colors",
+                "h-9 w-full flex items-center justify-center text-sm rounded-md transition-colors",
                 !cell.currentMonth && "text-muted-foreground/30",
                 cell.currentMonth && isPast && "text-muted-foreground/40 cursor-not-allowed",
                 cell.currentMonth && !isPast && !isSelected && !isToday && "text-foreground hover-elevate cursor-pointer",
@@ -223,7 +223,7 @@ function TimeSlotGrid({
                 disabled={state === "booked" || state === "duration-overlap" || state === "past"}
                 onClick={() => state === "available" && onSelect(slot)}
                 className={cn(
-                  "relative h-7 flex items-center justify-center text-[13px] font-medium rounded-md border transition-all",
+                  "relative h-8 flex items-center justify-center text-[13px] font-medium rounded-md border transition-all",
                   state === "available" &&
                     "bg-background border-border text-foreground hover-elevate cursor-pointer",
                   state === "selected" &&
@@ -394,19 +394,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card px-4 py-2 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex items-center gap-2">
-          <CalendarDays className="w-4 h-4 text-primary" />
+      <header className="border-b border-border bg-card px-5 py-3 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto flex items-center gap-2.5">
+          <CalendarDays className="w-5 h-5 text-primary" />
           <h1 className="text-base font-semibold text-foreground">Appointment Scheduler</h1>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto w-full px-4 py-3 flex-1">
+      <div className="max-w-6xl mx-auto w-full px-5 py-4 flex-1">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-            <div className="rounded-lg border border-card-border bg-card p-3">
-              <h2 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-primary" />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="rounded-lg border border-card-border bg-card p-4">
+              <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
                 Customer Information
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -415,8 +415,8 @@ export default function Home() {
                   name="customerName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                        <User className="w-3 h-3" /> <span className="text-foreground">Full Name</span> <span className="text-red-500">*</span>
+                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5" /> <span className="text-foreground">Full Name</span> <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -435,8 +435,8 @@ export default function Home() {
                   name="businessName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                        <Building2 className="w-3 h-3" /> <span className="text-foreground">Business Name</span> <span className="text-red-500">*</span>
+                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5" /> <span className="text-foreground">Business Name</span> <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -455,8 +455,8 @@ export default function Home() {
                   name="customerEmail"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                        <Mail className="w-3 h-3" /> <span className="text-foreground">Email Address</span> <span className="text-red-500">*</span>
+                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5" /> <span className="text-foreground">Email Address</span> <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -476,8 +476,8 @@ export default function Home() {
                   name="customerPhone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                        <Phone className="w-3 h-3" /> <span className="text-foreground">Mobile Number</span> <span className="text-red-500">*</span>
+                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5" /> <span className="text-foreground">Mobile Number</span> <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -508,11 +508,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <div className="space-y-3">
-                <div className="rounded-lg border border-card-border bg-card p-3">
-                  <h2 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                    <CalendarDays className="w-3.5 h-3.5 text-primary" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="rounded-lg border border-card-border bg-card p-4">
+                  <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4 text-primary" />
                     Select Date
                   </h2>
                   <CalendarWidget
@@ -522,25 +522,25 @@ export default function Home() {
                       setSelectedSlot(null);
                     }}
                   />
-                  <div className="mt-2 pt-2 border-t border-border">
-                    <p className="text-[11px] text-muted-foreground text-center">
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <p className="text-xs text-muted-foreground text-center">
                       {formatDisplayDate(selectedDate)}
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-card-border bg-card p-3">
-                  <h2 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                <div className="rounded-lg border border-card-border bg-card p-4">
+                  <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-primary" />
                     Store Location
                   </h2>
                   {locationsLoading ? (
-                    <div className="flex items-center justify-center py-3">
-                      <p className="text-xs text-muted-foreground animate-pulse" data-testid="text-loading-locations">Loading locations...</p>
+                    <div className="flex items-center justify-center py-4">
+                      <p className="text-sm text-muted-foreground animate-pulse" data-testid="text-loading-locations">Loading locations...</p>
                     </div>
                   ) : locations.length === 0 ? (
-                    <div className="flex items-center justify-center py-3">
-                      <p className="text-xs text-muted-foreground" data-testid="text-no-locations">No locations available</p>
+                    <div className="flex items-center justify-center py-4">
+                      <p className="text-sm text-muted-foreground" data-testid="text-no-locations">No locations available</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
@@ -554,7 +554,7 @@ export default function Home() {
                             setSelectedSlot(null);
                           }}
                           className={cn(
-                            "h-7 px-2 text-[13px] font-medium rounded-md border transition-all text-center leading-tight",
+                            "h-8 px-2 text-[13px] font-medium rounded-md border transition-all text-center leading-tight",
                             selectedLocationId === loc.id
                               ? "bg-green-500 border-green-500 text-white"
                               : "bg-background border-border text-foreground hover-elevate"
@@ -568,9 +568,9 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-card-border bg-card p-3">
-                <h2 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-primary" />
+              <div className="rounded-lg border border-card-border bg-card p-4">
+                <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary" />
                   Select Time
                   {availabilityLoading && (
                     <span className="ml-auto text-xs text-muted-foreground animate-pulse">
@@ -579,33 +579,33 @@ export default function Home() {
                   )}
                 </h2>
 
-                <div className="mb-2 flex items-center gap-3 text-[11px] text-muted-foreground">
+                <div className="mb-3 flex items-center gap-3 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-2.5 border border-border rounded-sm bg-background" />
+                    <div className="w-3.5 h-2.5 border border-border rounded-sm bg-background" />
                     <span>Available</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-2.5 border border-red-200 rounded-sm bg-red-50 dark:bg-red-950/20" />
+                    <div className="w-3.5 h-2.5 border border-red-200 rounded-sm bg-red-50 dark:bg-red-950/20" />
                     <span>Booked</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-2.5 border border-green-500 rounded-sm bg-green-500" />
+                    <div className="w-3.5 h-2.5 border border-green-500 rounded-sm bg-green-500" />
                     <span>Selected</span>
                   </div>
                 </div>
 
                 {!selectedLocationId ? (
-                  <div className="flex flex-col items-center justify-center py-6 text-muted-foreground" data-testid="text-select-location-prompt">
-                    <MapPin className="w-6 h-6 mb-1.5 opacity-40" />
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground" data-testid="text-select-location-prompt">
+                    <MapPin className="w-7 h-7 mb-2 opacity-40" />
                     <p className="text-sm">Select a location to view available times</p>
                   </div>
                 ) : availabilityLoading ? (
-                  <div className="flex items-center justify-center py-6" data-testid="text-loading-slots">
+                  <div className="flex items-center justify-center py-8" data-testid="text-loading-slots">
                     <p className="text-sm text-muted-foreground animate-pulse">Loading time slots...</p>
                   </div>
                 ) : availableSlots.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-6 text-muted-foreground" data-testid="text-no-slots">
-                    <Clock className="w-6 h-6 mb-1.5 opacity-40" />
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground" data-testid="text-no-slots">
+                    <Clock className="w-7 h-7 mb-2 opacity-40" />
                     <p className="text-sm">No available time slots for this date and location</p>
                   </div>
                 ) : (
