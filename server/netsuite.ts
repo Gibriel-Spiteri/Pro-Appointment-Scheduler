@@ -235,7 +235,7 @@ export interface NetSuiteSchedule {
   scheduleChange: boolean;
 }
 
-const CUSTOMER_FACING_LOCATION_IDS = [5, 2, 4, 3, 17];
+const CUSTOMER_FACING_LOCATION_IDS = [5, 2, 4, 3, 17, 16];
 
 export async function fetchLocations(): Promise<NetSuiteLocation[]> {
   const locationIds = CUSTOMER_FACING_LOCATION_IDS.join(",");
@@ -609,6 +609,59 @@ export async function callRestlet(
   } catch (error: any) {
     log(`RESTlet call failed: ${error.message}`, "netsuite");
     return { success: false, error: `Request failed: ${error.message}` };
+  }
+}
+
+export async function createCustomRecord(
+  recordType: string,
+  fields: Record<string, any>
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  const config = validateNetSuiteConfig();
+  if (!config.valid) {
+    return { success: false, error: `Missing NetSuite configuration: ${config.missing.join(", ")}` };
+  }
+
+  try {
+    const accessToken = await getAccessToken();
+    const url = `${getBaseUrl()}/services/rest/record/v1/${recordType}`;
+
+    log(`Creating ${recordType} record`, "netsuite");
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        Prefer: "respond-async,resultrep",
+      },
+      body: JSON.stringify(fields),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      log(`Failed to create ${recordType}: (${response.status}) ${errorBody}`, "netsuite");
+      if (response.status === 401) cachedToken = null;
+      return { success: false, error: `${response.status}: ${errorBody}` };
+    }
+
+    const location = response.headers.get("Location") || "";
+    const idMatch = location.match(/\/(\d+)$/);
+    let id: string | undefined;
+
+    if (idMatch) {
+      id = idMatch[1];
+    } else {
+      try {
+        const data = await response.json();
+        id = data.id ? String(data.id) : undefined;
+      } catch {}
+    }
+
+    log(`Created ${recordType} record: ${id || "unknown id"}`, "netsuite");
+    return { success: true, id };
+  } catch (error: any) {
+    log(`Error creating ${recordType}: ${error.message}`, "netsuite");
+    return { success: false, error: error.message };
   }
 }
 
