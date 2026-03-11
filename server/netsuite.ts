@@ -46,7 +46,7 @@ function createClientAssertion(): string {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: clientId,
-    scope: ["rest_webservices"],
+    scope: ["rest_webservices", "restlets"],
     aud: tokenEndpoint,
     iat: now,
     exp: now + 3600,
