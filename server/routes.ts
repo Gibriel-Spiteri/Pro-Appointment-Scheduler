@@ -106,7 +106,7 @@ export async function registerRoutes(
             customerName: data.customerName,
             businessName: data.businessName,
             customerEmail: data.customerEmail,
-            customerPhone: data.customerPhone,
+            customerPhone: data.customerPhone.replace(/\D/g, ""),
             location: data.location,
             locationId: locationId,
             appointmentDate: data.appointmentDate,
