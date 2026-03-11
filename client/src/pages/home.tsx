@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { bookAppointmentSchema, type BookAppointment } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
@@ -352,10 +352,19 @@ export default function Home() {
       }));
       navigate("/confirmation");
     },
-    onError: () => {
+    onError: (error: Error) => {
+      const isSlotTaken = error.message.includes("slot_taken");
+      if (isSlotTaken) {
+        setSelectedSlot(null);
+        form.setValue("startTime", "");
+        form.setValue("endTime", "");
+        queryClient.invalidateQueries({ queryKey: ["/api/availability"] });
+      }
       toast({
-        title: "Booking failed",
-        description: "An error occurred while booking your appointment. Please try again.",
+        title: isSlotTaken ? "Time slot no longer available" : "Booking failed",
+        description: isSlotTaken
+          ? "Sorry, this time slot was just taken. Please select a different time."
+          : "An error occurred while booking your appointment. Please try again.",
         variant: "destructive",
       });
     },

@@ -97,6 +97,10 @@ export async function registerRoutes(
         }
       }
 
+      if (!salesperson) {
+        return res.status(409).json({ error: "slot_taken", message: "Sorry, this time slot is no longer available. Please select a different time." });
+      }
+
       if (salesperson) {
         try {
           const restletResult = await createAppointmentViaRestlet({
