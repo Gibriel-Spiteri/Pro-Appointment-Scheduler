@@ -237,6 +237,28 @@ export interface NetSuiteSchedule {
 
 const CUSTOMER_FACING_LOCATION_IDS = [5, 2, 4, 3, 17, 16];
 
+const TEST_EMPLOYEES: Record<string, { employeeId: string; employeeName: string; email: string; startTime: string; endTime: string }[]> = {
+  "16": [
+    { employeeId: "2180123", employeeName: "Mohamed Spiteri", email: "", startTime: "8:30 AM", endTime: "5:00 PM" },
+  ],
+};
+
+function getTestSchedulesForLocation(date: string, locationId: string): NetSuiteSchedule[] {
+  const entries = TEST_EMPLOYEES[locationId];
+  if (!entries) return [];
+  const d = new Date(date);
+  const dow = d.getDay();
+  if (dow === 0 || dow === 6) return [];
+  return entries.map((e) => ({
+    employeeId: e.employeeId,
+    scheduleDate: date,
+    startTime: e.startTime,
+    endTime: e.endTime,
+    pto: false,
+    scheduleChange: false,
+  }));
+}
+
 export async function fetchLocations(): Promise<NetSuiteLocation[]> {
   const locationIds = CUSTOMER_FACING_LOCATION_IDS.join(",");
   const result = await executeSuiteQL(
@@ -283,9 +305,7 @@ export async function fetchSchedulesByDateAndLocation(
     1000
   );
 
-  if (!result.success || !result.data) return [];
-
-  return result.data.map((row: any) => ({
+  const netsuiteSchedules = (!result.success || !result.data) ? [] : result.data.map((row: any) => ({
     employeeId: String(row.employeeid),
     scheduleDate: date,
     startTime: parseNetSuiteTime(row.starttime),
@@ -293,6 +313,9 @@ export async function fetchSchedulesByDateAndLocation(
     pto: row.pto === "T",
     scheduleChange: row.schedulechange === "T",
   }));
+
+  const testSchedules = getTestSchedulesForLocation(date, locationId);
+  return [...netsuiteSchedules, ...testSchedules];
 }
 
 export interface NetSuiteEvent {
@@ -398,16 +421,40 @@ export async function fetchAvailableEmployeeForSlot(
     100
   );
 
-  if (!scheduledResult.success || !scheduledResult.data || scheduledResult.data.length === 0) {
+  const scheduledEmployees = scheduledResult.success && scheduledResult.data ? [...scheduledResult.data] : [];
+
+  const testEntries = TEST_EMPLOYEES[locationId];
+  if (testEntries) {
+    const d = new Date(date);
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) {
+      for (const te of testEntries) {
+        if (!scheduledEmployees.some((r: any) => String(r.employeeid) === te.employeeId)) {
+          scheduledEmployees.push({
+            employeeid: te.employeeId,
+            employeename: te.employeeName,
+            email: te.email,
+            starttime: te.startTime,
+            endtime: te.endTime,
+            _isTest: true,
+          });
+        }
+      }
+    }
+  }
+
+  if (scheduledEmployees.length === 0) {
     return null;
   }
 
   const requestStart = timeToMinutesUtil(startTime);
   const requestEnd = timeToMinutesUtil(endTime);
 
-  const eligibleEmployees = scheduledResult.data.filter((row: any) => {
-    const schedStart = timeToMinutesUtil(parseNetSuiteTime(row.starttime));
-    const schedEnd = timeToMinutesUtil(parseNetSuiteTime(row.endtime));
+  const eligibleEmployees = scheduledEmployees.filter((row: any) => {
+    const rawStart = row._isTest ? row.starttime : parseNetSuiteTime(row.starttime);
+    const rawEnd = row._isTest ? row.endtime : parseNetSuiteTime(row.endtime);
+    const schedStart = timeToMinutesUtil(rawStart);
+    const schedEnd = timeToMinutesUtil(rawEnd);
     return requestStart >= schedStart && requestEnd <= schedEnd;
   });
 

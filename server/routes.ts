@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage, generateTimeSlotsFromSchedules, filterAvailableSlots } from "./storage";
 import { bookAppointmentSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { testConnection, executeSuiteQL, validateNetSuiteConfig, fetchAvailableEmployeeForSlot, createCustomRecord } from "./netsuite";
+import { testConnection, executeSuiteQL, validateNetSuiteConfig, fetchAvailableEmployeeForSlot } from "./netsuite";
 import { createAppointmentViaRestlet } from "./email";
 import { log } from "./index";
 
@@ -174,52 +174,6 @@ export async function registerRoutes(
       res.json(result);
     } catch (error) {
       res.status(500).json({ success: false, message: "Failed to test NetSuite connection" });
-    }
-  });
-
-  app.post("/api/test/seed-schedule", async (req, res) => {
-    try {
-      const { employeeId = "2180123", days = 30, startTime = "8:30 AM", endTime = "5:00 PM" } = req.body || {};
-
-      const existingCheck = await executeSuiteQL(
-        `SELECT id FROM customrecord_schedule WHERE custrecord_sch_employee = ${parseInt(employeeId, 10)} AND custrecord_sch_date >= SYSDATE ORDER BY custrecord_sch_date`,
-        1
-      );
-
-      if (existingCheck.success && existingCheck.data && existingCheck.data.length > 0) {
-        return res.json({ success: true, message: "Schedule records already exist for this employee", skipped: true });
-      }
-
-      const results: any[] = [];
-      const today = new Date();
-      let created = 0;
-
-      for (let i = 0; i < days; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
-        const dow = d.getDay();
-        if (dow === 0 || dow === 6) continue;
-
-        const dateStr = `${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")}/${d.getFullYear()}`;
-
-        const result = await createCustomRecord("customrecord_schedule", {
-          custrecord_sch_employee: { id: employeeId },
-          custrecord_sch_date: dateStr,
-          custrecord_sch_starttime: startTime,
-          custrecord_sch_endtime: endTime,
-          custrecord_sch_pto: false,
-          custrecord_sch_change: false,
-        });
-
-        results.push({ date: dateStr, ...result });
-        if (result.success) created++;
-      }
-
-      log(`Seeded ${created} schedule records for employee ${employeeId}`, "test");
-      res.json({ success: true, created, results });
-    } catch (error: any) {
-      log(`Schedule seeding failed: ${error.message}`, "test");
-      res.status(500).json({ success: false, error: error.message });
     }
   });
 
