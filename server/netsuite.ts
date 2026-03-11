@@ -352,10 +352,12 @@ export async function fetchEventsByDateAndLocation(
        ce.custevent_storeloc AS storelocationid,
        ce.status AS status
      FROM calendarevent ce
+     JOIN employee e ON ce.organizer = e.id
      WHERE TRUNC(ce.startdate) = TO_DATE('${nsDate}', 'MM/DD/YYYY')
        AND ce.custevent_storeloc = ${numericLocationId}
        AND ce.status = 'CONFIRMED'
-       AND ce.custevent_etype NOT IN (10, 12)`,
+       AND ce.custevent_etype NOT IN (10, 12)
+       AND UPPER(e.title) IN ('STORE MANAGER', 'SALES MANAGER')`,
     1000
   );
 
