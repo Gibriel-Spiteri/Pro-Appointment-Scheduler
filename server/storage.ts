@@ -45,9 +45,10 @@ export function generateTimeSlotsFromSchedules(schedules: NetSuiteSchedule[]): s
     if (end > latestEnd) latestEnd = end;
   }
 
+  const APPOINTMENT_DURATION = 60;
   const slots: string[] = [];
   let current = earliestStart;
-  while (current < latestEnd) {
+  while (current + APPOINTMENT_DURATION <= latestEnd) {
     slots.push(minutesToTime(current));
     current += 30;
   }
