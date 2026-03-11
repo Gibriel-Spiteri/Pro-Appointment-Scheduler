@@ -301,7 +301,8 @@ export async function fetchSchedulesByDateAndLocation(
      JOIN employee e ON s.custrecord_sch_employee = e.id
      WHERE s.custrecord_sch_date = '${nsDate}'
        AND e.location = ${numericLocationId}
-       AND s.isinactive = 'F'`,
+       AND s.isinactive = 'F'
+       AND UPPER(e.title) = 'STORE MANAGER'`,
     1000
   );
 
@@ -417,7 +418,8 @@ export async function fetchAvailableEmployeeForSlot(
        AND e.location = ${numericLocationId}
        AND s.isinactive = 'F'
        AND s.custrecord_sch_pto = 'F'
-       AND s.custrecord_sch_change = 'F'`,
+       AND s.custrecord_sch_change = 'F'
+       AND UPPER(e.title) = 'STORE MANAGER'`,
     100
   );
 
