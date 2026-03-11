@@ -155,17 +155,39 @@ function CalendarWidget({
   );
 }
 
+function isSlotInPast(slot: string, selectedDate: Date): boolean {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const selected = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+  if (selected.getTime() !== today.getTime()) return false;
+  const slotMinutes = timeToMinutes(slot);
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  return slotMinutes <= nowMinutes;
+}
+
 function TimeSlotGrid({
   slots,
   bookedSlots,
   selectedSlot,
+  selectedDate,
   onSelect,
 }: {
   slots: string[];
   bookedSlots: { startTime: string; endTime: string }[];
   selectedSlot: string | null;
+  selectedDate: Date;
   onSelect: (slot: string) => void;
 }) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selected = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    if (selected.getTime() !== today.getTime()) return;
+    const interval = setInterval(() => setTick((t) => t + 1), 60000);
+    return () => clearInterval(interval);
+  }, [selectedDate]);
+
   const pairs: [string, string | null][] = [];
   for (let i = 0; i < slots.length; i += 2) {
     pairs.push([slots[i], slots[i + 1] ?? null]);
@@ -174,7 +196,8 @@ function TimeSlotGrid({
   const selectedStartMin = selectedSlot ? timeToMinutes(selectedSlot) : null;
   const selectedEndMin = selectedStartMin !== null ? selectedStartMin + DURATION : null;
 
-  function getSlotState(slot: string): "available" | "booked" | "selected" | "duration-overlap" {
+  function getSlotState(slot: string): "available" | "booked" | "selected" | "duration-overlap" | "past" {
+    if (isSlotInPast(slot, selectedDate)) return "past";
     if (isSlotBooked(slot, bookedSlots)) return "booked";
     if (slot === selectedSlot) return "selected";
     if (selectedStartMin !== null && selectedEndMin !== null) {
@@ -197,7 +220,7 @@ function TimeSlotGrid({
               <button
                 key={si}
                 data-testid={`button-timeslot-${slot.replace(/[: ]/g, "-")}`}
-                disabled={state === "booked" || state === "duration-overlap"}
+                disabled={state === "booked" || state === "duration-overlap" || state === "past"}
                 onClick={() => state === "available" && onSelect(slot)}
                 className={cn(
                   "relative h-9 flex items-center justify-center text-[15px] font-medium rounded-md border transition-all",
@@ -209,6 +232,8 @@ function TimeSlotGrid({
                     "bg-muted/60 border-muted text-muted-foreground cursor-not-allowed",
                   state === "booked" &&
                     "cursor-not-allowed border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900/30",
+                  state === "past" &&
+                    "cursor-not-allowed border-muted bg-muted/40 text-muted-foreground/50",
                 )}
               >
                 {state === "booked" ? (
@@ -566,6 +591,7 @@ export default function Home() {
                     slots={availableSlots}
                     bookedSlots={bookedSlots}
                     selectedSlot={selectedSlot}
+                    selectedDate={selectedDate}
                     onSelect={(slot) => setSelectedSlot(selectedSlot === slot ? null : slot)}
                   />
                 )}
