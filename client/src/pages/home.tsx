@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 interface Location {
   id: string;
   name: string;
+  address?: string;
 }
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -543,27 +544,35 @@ export default function Home() {
                       <p className="text-sm text-muted-foreground" data-testid="text-no-locations">No locations available</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      {locations.map((loc) => (
-                        <button
-                          key={loc.id}
-                          type="button"
-                          data-testid={`button-location-${loc.name.replace(/\s+/g, "-").toLowerCase()}`}
-                          onClick={() => {
-                            setSelectedLocationId(loc.id);
-                            setSelectedSlot(null);
-                          }}
-                          className={cn(
-                            "h-8 px-2 text-[13px] font-medium rounded-md border transition-all text-center leading-tight",
-                            selectedLocationId === loc.id
-                              ? "bg-green-500 border-green-500 text-white"
-                              : "bg-background border-border text-foreground hover-elevate"
-                          )}
-                        >
-                          {loc.name}
-                        </button>
-                      ))}
-                    </div>
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        {locations.map((loc) => (
+                          <button
+                            key={loc.id}
+                            type="button"
+                            data-testid={`button-location-${loc.name.replace(/\s+/g, "-").toLowerCase()}`}
+                            onClick={() => {
+                              setSelectedLocationId(loc.id);
+                              setSelectedSlot(null);
+                            }}
+                            className={cn(
+                              "h-8 px-2 text-[13px] font-medium rounded-md border transition-all text-center leading-tight",
+                              selectedLocationId === loc.id
+                                ? "bg-green-500 border-green-500 text-white"
+                                : "bg-background border-border text-foreground hover-elevate"
+                            )}
+                          >
+                            {loc.name}
+                          </button>
+                        ))}
+                      </div>
+                      {selectedLocation?.address && (
+                        <div className="mt-2 flex items-start gap-1.5 text-xs text-muted-foreground" data-testid="text-location-address">
+                          <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+                          <span>{selectedLocation.address}</span>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

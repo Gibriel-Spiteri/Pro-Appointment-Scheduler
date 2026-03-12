@@ -224,6 +224,7 @@ function formatDateForSuiteQL(dateStr: string): string {
 export interface NetSuiteLocation {
   id: string;
   name: string;
+  address?: string;
 }
 
 export interface NetSuiteSchedule {
@@ -259,9 +260,31 @@ function getTestSchedulesForLocation(date: string, locationId: string): NetSuite
   }));
 }
 
+async function fetchLocationAddress(locationId: number): Promise<string | undefined> {
+  try {
+    const accessToken = await getAccessToken();
+    const baseUrl = getBaseUrl();
+    const url = `${baseUrl}/services/rest/record/v1/location/${locationId}?expandSubResources=true`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) return undefined;
+    const data = await response.json();
+    const mainAddr = data.mainAddress;
+    if (!mainAddr) return undefined;
+    const parts = [mainAddr.addr1, mainAddr.city, mainAddr.state, mainAddr.zip].filter(Boolean);
+    return parts.length > 0 ? parts.join(", ") : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function fetchLocations(): Promise<NetSuiteLocation[]> {
   const locationIds = CUSTOMER_FACING_LOCATION_IDS.join(",");
-  const result = await executeSuiteQL(
+  const employeeResult = await executeSuiteQL(
     `SELECT DISTINCT e.location AS id, BUILTIN.DF(e.location) AS name
      FROM employee e
      WHERE e.isinactive = 'F' AND e.location IN (${locationIds})
@@ -269,11 +292,20 @@ export async function fetchLocations(): Promise<NetSuiteLocation[]> {
     100
   );
 
-  if (!result.success || !result.data) return [];
+  if (!employeeResult.success || !employeeResult.data) return [];
 
-  return result.data
+  const locations = employeeResult.data
     .filter((row: any) => row.name && row.id)
     .map((row: any) => ({ id: String(row.id), name: String(row.name) }));
+
+  const addressResults = await Promise.all(
+    locations.map((loc: NetSuiteLocation) => fetchLocationAddress(parseInt(loc.id, 10)))
+  );
+
+  return locations.map((loc: NetSuiteLocation, i: number) => ({
+    ...loc,
+    address: addressResults[i],
+  }));
 }
 
 export async function fetchSchedulesByDateAndLocation(
