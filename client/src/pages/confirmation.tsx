@@ -92,21 +92,6 @@ export default function Confirmation() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Location</p>
-                  <p className="text-sm font-medium text-foreground" data-testid="text-summary-location">
-                    {appointment.location}
-                  </p>
-                  {appointment.locationAddress && (
-                    <p className="text-xs text-muted-foreground mt-0.5" data-testid="text-summary-location-address">
-                      {appointment.locationAddress}
-                    </p>
-                  )}
-                </div>
-              </div>
-
               {appointment.salesPersonName && (
                 <div className="flex items-start gap-3">
                   <UserCheck className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
@@ -118,6 +103,16 @@ export default function Confirmation() {
                   </div>
                 </div>
               )}
+
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Location</p>
+                  <p className="text-sm font-medium text-foreground" data-testid="text-summary-location">
+                    {appointment.locationAddress || appointment.location}
+                  </p>
+                </div>
+              </div>
 
               <div className="border-t border-border pt-4 space-y-3">
                 <div className="flex items-start gap-3">
