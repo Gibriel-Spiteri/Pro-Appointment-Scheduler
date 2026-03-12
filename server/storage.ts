@@ -36,19 +36,26 @@ export function generateTimeSlotsFromSchedules(schedules: NetSuiteSchedule[]): s
   const activeSchedules = schedules.filter((s) => !s.pto && !s.scheduleChange);
   if (activeSchedules.length === 0) return [];
 
-  let earliestStart = Infinity;
+  let earliestEligible = Infinity;
   let latestEnd = -Infinity;
   for (const s of activeSchedules) {
-    const start = timeToMinutes(s.startTime);
+    const eligibleStart = timeToMinutes(s.startTime) + 30;
     const end = timeToMinutes(s.endTime);
-    if (start < earliestStart) earliestStart = start;
+    if (eligibleStart < earliestEligible) earliestEligible = eligibleStart;
     if (end > latestEnd) latestEnd = end;
   }
 
   const slots: string[] = [];
-  let current = earliestStart;
+  let current = earliestEligible;
   while (current < latestEnd) {
-    slots.push(minutesToTime(current));
+    const hasEligibleEmployee = activeSchedules.some((s) => {
+      const eligibleStart = timeToMinutes(s.startTime) + 30;
+      const end = timeToMinutes(s.endTime);
+      return current >= eligibleStart && current < end;
+    });
+    if (hasEligibleEmployee) {
+      slots.push(minutesToTime(current));
+    }
     current += 30;
   }
   return slots;

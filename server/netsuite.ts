@@ -459,7 +459,7 @@ export async function fetchAvailableEmployeeForSlot(
     const rawEnd = row._isTest ? row.endtime : parseNetSuiteTime(row.endtime);
     const schedStart = timeToMinutesUtil(rawStart);
     const schedEnd = timeToMinutesUtil(rawEnd);
-    return requestStart >= schedStart && requestEnd <= schedEnd;
+    return requestStart >= schedStart + 30 && requestEnd <= schedEnd;
   });
 
   if (eligibleEmployees.length === 0) return null;
