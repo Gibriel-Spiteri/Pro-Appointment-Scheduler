@@ -159,18 +159,6 @@ export default function Confirmation() {
               </div>
             </div>
           </div>
-
-          <div className="flex justify-center mt-6">
-            <Button
-              onClick={() => {
-                sessionStorage.removeItem("lastAppointment");
-                navigate("/");
-              }}
-              data-testid="button-book-another"
-            >
-              Book Another Appointment
-            </Button>
-          </div>
         </div>
       </div>
     </div>
