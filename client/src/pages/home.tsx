@@ -567,8 +567,8 @@ export default function Home() {
                         ))}
                       </div>
                       {selectedLocation?.address && (
-                        <div className="mt-2 flex items-start gap-1.5 text-xs text-muted-foreground" data-testid="text-location-address">
-                          <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+                        <div className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground" data-testid="text-location-address">
+                          <MapPin className="w-3.5 h-3.5 shrink-0 text-primary" />
                           <span>{selectedLocation.address}</span>
                         </div>
                       )}
