@@ -98,6 +98,7 @@ function CalendarWidget({
     <div className="select-none">
       <div className="flex items-center justify-between mb-3">
         <button
+          type="button"
           data-testid="button-prev-month"
           onClick={prevMonth}
           className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
@@ -108,6 +109,7 @@ function CalendarWidget({
           {MONTHS[month]} {year}
         </span>
         <button
+          type="button"
           data-testid="button-next-month"
           onClick={nextMonth}
           className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
@@ -136,6 +138,7 @@ function CalendarWidget({
           return (
             <button
               key={idx}
+              type="button"
               data-testid={`button-date-${toLocalDateStr(cell.date)}`}
               onClick={() => !isPast && cell.currentMonth && onDateSelect(cell.date)}
               className={cn(
@@ -220,6 +223,7 @@ function TimeSlotGrid({
             return (
               <button
                 key={si}
+                type="button"
                 data-testid={`button-timeslot-${slot.replace(/[: ]/g, "-")}`}
                 disabled={state === "booked" || state === "duration-overlap" || state === "past"}
                 onClick={() => state === "available" && onSelect(slot)}
