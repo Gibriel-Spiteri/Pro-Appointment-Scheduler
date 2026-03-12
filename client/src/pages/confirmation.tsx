@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { CalendarDays, CheckCircle2, Clock, MapPin, User, Building2, Mail, Phone } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, MapPin, User, Building2, Mail, Phone, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AppointmentSummary {
@@ -9,9 +9,11 @@ interface AppointmentSummary {
   customerEmail: string;
   customerPhone: string;
   location: string;
+  locationAddress?: string;
   appointmentDate: string;
   startTime: string;
   endTime: string;
+  salesPersonName?: string;
 }
 
 export default function Confirmation() {
@@ -97,8 +99,25 @@ export default function Confirmation() {
                   <p className="text-sm font-medium text-foreground" data-testid="text-summary-location">
                     {appointment.location}
                   </p>
+                  {appointment.locationAddress && (
+                    <p className="text-xs text-muted-foreground mt-0.5" data-testid="text-summary-location-address">
+                      {appointment.locationAddress}
+                    </p>
+                  )}
                 </div>
               </div>
+
+              {appointment.salesPersonName && (
+                <div className="flex items-start gap-3">
+                  <UserCheck className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Scheduled with</p>
+                    <p className="text-sm font-medium text-foreground" data-testid="text-summary-salesperson">
+                      {appointment.salesPersonName}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div className="border-t border-border pt-4 space-y-3">
                 <div className="flex items-start gap-3">

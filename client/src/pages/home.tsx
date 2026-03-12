@@ -340,16 +340,18 @@ export default function Home() {
 
   const mutation = useMutation({
     mutationFn: (data: BookAppointment) => apiRequest("POST", "/api/appointments", data),
-    onSuccess: (_res, variables) => {
+    onSuccess: (res, variables) => {
       sessionStorage.setItem("lastAppointment", JSON.stringify({
         customerName: variables.customerName,
         businessName: variables.businessName || undefined,
         customerEmail: variables.customerEmail,
         customerPhone: variables.customerPhone,
         location: variables.location,
+        locationAddress: selectedLocation?.address,
         appointmentDate: variables.appointmentDate,
         startTime: variables.startTime,
         endTime: variables.endTime,
+        salesPersonName: (res as any)?.salesperson?.name,
       }));
       navigate("/confirmation");
     },
