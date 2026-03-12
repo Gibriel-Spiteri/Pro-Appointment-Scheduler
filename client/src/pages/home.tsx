@@ -339,7 +339,10 @@ export default function Home() {
   }, [selectedSlot]);
 
   const mutation = useMutation({
-    mutationFn: (data: BookAppointment) => apiRequest("POST", "/api/appointments", data),
+    mutationFn: async (data: BookAppointment) => {
+      const res = await apiRequest("POST", "/api/appointments", data);
+      return res.json();
+    },
     onSuccess: (res, variables) => {
       sessionStorage.setItem("lastAppointment", JSON.stringify({
         customerName: variables.customerName,
@@ -351,7 +354,7 @@ export default function Home() {
         appointmentDate: variables.appointmentDate,
         startTime: variables.startTime,
         endTime: variables.endTime,
-        salesPersonName: (res as any)?.salesperson?.name,
+        salesPersonName: res?.salesperson?.name,
       }));
       navigate("/confirmation");
     },
