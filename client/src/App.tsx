@@ -7,7 +7,6 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Confirmation from "@/pages/confirmation";
 import NetSuite from "@/pages/netsuite";
-import TrainingVideo from "@/pages/training";
 
 function Router() {
   return (
@@ -15,7 +14,6 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/confirmation" component={Confirmation} />
       <Route path="/netsuite" component={NetSuite} />
-      <Route path="/training" component={TrainingVideo} />
       <Route component={NotFound} />
     </Switch>
   );

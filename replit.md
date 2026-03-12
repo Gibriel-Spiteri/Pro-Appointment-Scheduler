@@ -47,15 +47,6 @@ A web-based appointment scheduling application built with React, Express, and Ty
 - `/` — Main scheduling page (calendar, time slots, location, customer form)
 - `/confirmation` — Appointment summary shown after successful booking
 - `/netsuite` — NetSuite connection dashboard (status, test connection, SuiteQL query)
-- `/training` — Animated employee training video for the Appointment Scheduler
-
-## Training Video
-- **Location**: `client/src/pages/training.tsx` renders `VideoTemplate` from `client/src/components/video/VideoTemplate.tsx`
-- **Scene files**: `client/src/components/video/video_scenes/` (IntroScene, Step1-5, OutroScene)
-- **Video hook**: `client/src/lib/video/hooks.ts` — `useVideoPlayer` manages scene timing, advancement, and looping
-- **Libraries**: framer-motion (animations), gsap (complex timelines)
-- **Features**: Auto-plays on load, loops continuously, 16:9 aspect ratio, 7 scenes covering the full booking workflow
-- **Scenes**: Intro → Customer Info → Pick Date → Pick Location → Select Time → Confirm Booking → Outro/Confirmation
 
 ## Key Features
 - Interactive calendar for date selection (no past date selection)

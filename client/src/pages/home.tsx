@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ChevronLeft, ChevronRight, CalendarDays, Clock, MapPin, User, Mail, Phone, Building2, HelpCircle, PlayCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, Clock, MapPin, User, Mail, Phone, Building2, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -395,22 +395,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card px-5 py-3 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <CalendarDays className="w-5 h-5 text-primary" />
-            <h1 className="text-base font-semibold text-foreground">Appointment Scheduler</h1>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            data-testid="button-training-video"
-            onClick={() => navigate("/training")}
-            className="flex items-center gap-1.5 text-xs"
-          >
-            <PlayCircle className="w-3.5 h-3.5" />
-            Training Video
-          </Button>
+        <div className="max-w-6xl mx-auto flex items-center gap-2.5">
+          <CalendarDays className="w-5 h-5 text-primary" />
+          <h1 className="text-base font-semibold text-foreground">Appointment Scheduler</h1>
         </div>
       </header>
 
