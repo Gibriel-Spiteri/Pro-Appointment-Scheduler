@@ -24,7 +24,7 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-const DURATION = 60;
+const DURATION = 30;
 
 function toLocalDateStr(d: Date): string {
   const y = d.getFullYear();
