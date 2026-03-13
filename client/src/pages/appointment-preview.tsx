@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { CalendarDays, Clock, MapPin, User, Building2, ChevronLeft, TrendingUp, BarChart3, Globe, Handshake, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, TrendingUp, BarChart3, Globe, Handshake, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AppointmentSummary {
@@ -31,17 +31,6 @@ export default function AppointmentPreview() {
 
   if (!appointment) return null;
 
-  const formatDate = (dateStr: string) => {
-    const [y, m, d] = dateStr.split("-").map(Number);
-    const date = new Date(y, m - 1, d);
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card px-6 py-4">
@@ -63,41 +52,6 @@ export default function AppointmentPreview() {
 
       <div className="flex-1 flex items-start justify-center px-6 pt-8 pb-10">
         <div className="w-full max-w-2xl space-y-6">
-
-          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-            <div className="bg-primary px-6 py-5">
-              <div className="flex items-center gap-2 text-primary-foreground/80 text-xs mb-1">
-                <CalendarDays className="w-3.5 h-3.5" />
-                <span>Your Scheduled Meeting</span>
-              </div>
-              <h2 className="text-xl font-bold text-primary-foreground">
-                Consumers Wholesale PROgram
-              </h2>
-              <p className="text-primary-foreground/80 text-sm mt-1">
-                {formatDate(appointment.appointmentDate)} &nbsp;·&nbsp; {appointment.startTime} – {appointment.endTime}
-              </p>
-            </div>
-
-            <div className="px-6 py-4 flex flex-wrap gap-4 text-sm">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <span className="text-foreground">{appointment.locationAddress || appointment.location}</span>
-              </div>
-              {appointment.salesPersonName && (
-                <div className="flex items-start gap-2">
-                  <User className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <span className="text-foreground">With {appointment.salesPersonName}</span>
-                </div>
-              )}
-              <div className="flex items-start gap-2">
-                <User className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <span className="text-foreground">
-                  {appointment.customerName}
-                  {appointment.businessName && <span className="text-muted-foreground"> · {appointment.businessName}</span>}
-                </span>
-              </div>
-            </div>
-          </div>
 
           <div className="text-center px-2">
             <p className="text-lg font-semibold text-foreground">Here's what we'll cover in your 20 minutes</p>
