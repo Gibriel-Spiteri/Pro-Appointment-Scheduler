@@ -102,7 +102,7 @@ export default function Register() {
 
       <div className="max-w-3xl mx-auto w-full px-5 py-8 flex-1">
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-foreground">Consumers PROgram</h2>
+          <h2 className="text-2xl font-bold text-foreground">Register for the Consumers Wholesale PROgram</h2>
           <p className="text-sm text-muted-foreground mt-1">
             Please fill in your information to schedule an appointment with one of our representatives.
           </p>
