@@ -120,9 +120,6 @@ export default function AppointmentPreview() {
               Better margins, rebate potential, easier account management, and stronger contractor support all start with this conversation.
             </p>
           </div>
-          <button className="rounded-xl bg-amber-600 px-6 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]">
-            I'll Be There
-          </button>
         </div>
       </section>
     </div>
