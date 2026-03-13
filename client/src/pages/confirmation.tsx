@@ -46,7 +46,7 @@ export default function Confirmation() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card px-6 py-4">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-semibold text-foreground" data-testid="text-confirmation-title">Appointment Confirmed!</h1>
+          <h1 className="text-2xl font-semibold text-foreground text-center" data-testid="text-confirmation-title">Appointment Confirmed!</h1>
         </div>
       </header>
 
