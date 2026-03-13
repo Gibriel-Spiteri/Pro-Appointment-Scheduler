@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { CalendarDays, CheckCircle2, Clock, MapPin, User, Building2, Mail, Phone, UserCheck } from "lucide-react";
+import { CalendarDays, Clock, MapPin, User, Building2, Mail, Phone, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AppointmentSummary {
@@ -54,9 +54,6 @@ export default function Confirmation() {
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-lg">
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
-              <CheckCircle2 className="w-8 h-8 text-green-500" />
-            </div>
             <h2 className="text-2xl font-semibold text-foreground mb-1" data-testid="text-confirmation-title">
               Appointment Confirmed!
             </h2>
