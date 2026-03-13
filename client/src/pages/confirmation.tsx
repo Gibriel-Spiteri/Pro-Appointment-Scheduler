@@ -54,7 +54,7 @@ export default function Confirmation() {
       <div className="flex-1 flex items-start justify-center px-6 pt-8 pb-8">
         <div className="w-full max-w-2xl">
           <div className="rounded-xl border border-card-border bg-card overflow-hidden shadow-sm">
-            <div className="px-6 py-5 bg-[#01426A]">
+            <div className="px-6 py-5 bg-[#005287]">
               <div className="flex items-center gap-2 text-primary-foreground/80 text-xs mb-1">
                 <CalendarDays className="w-3.5 h-3.5" />
                 <span>Appointment Invitation</span>
