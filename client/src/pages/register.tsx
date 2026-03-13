@@ -72,7 +72,7 @@ export default function Register() {
       businessType: "",
       address: "",
       city: "",
-      state: "",
+      state: "NY",
       zip: "",
     },
   });
