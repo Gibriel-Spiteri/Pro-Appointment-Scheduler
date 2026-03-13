@@ -79,9 +79,8 @@ export default function AppointmentPreview() {
           <h2 className="mt-2 text-xl font-semibold tracking-tight md:text-3xl">
             A quick meeting with real business upside.
           </h2>
-          <p className="mt-3 text-sm leading-6 text-stone-600">
-            This is not a generic overview. It's a focused walkthrough of the pieces that can directly impact your profit, process, and customer experience.
-          </p>
+          <p className="mt-3 text-sm leading-6 text-stone-600">This is not a generic overview.
+          It's a focused walkthrough of the pieces that can directly impact your profit, process, and customer experience.</p>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
