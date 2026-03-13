@@ -614,16 +614,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-1 pb-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                data-testid="button-back"
-                onClick={() => navigate("/")}
-              >
-                Back
-              </Button>
+            <div className="flex items-center justify-end pt-1 pb-2">
               <div className="flex items-center gap-3">
                 <Button
                   type="button"
@@ -633,6 +624,15 @@ export default function Home() {
                   onClick={handleCancel}
                 >
                   Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  data-testid="button-back"
+                  onClick={() => navigate("/")}
+                >
+                  Back
                 </Button>
                 <Button
                   type="submit"
