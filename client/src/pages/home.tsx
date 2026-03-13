@@ -460,43 +460,6 @@ export default function Home() {
         </p>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="rounded-lg border border-card-border bg-card p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <User className="w-4 h-4 text-primary" />
-                  Customer Information
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => navigate("/")}
-                  className="text-xs text-primary hover:underline"
-                  data-testid="link-edit-registration"
-                >
-                  Edit
-                </button>
-              </div>
-              {regData && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5"><User className="w-3 h-3" /> Full Name</p>
-                    <p className="text-sm font-medium text-foreground" data-testid="text-customer-name">{regData.customerName}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5"><Building2 className="w-3 h-3" /> Business</p>
-                    <p className="text-sm font-medium text-foreground" data-testid="text-business-name">{regData.businessName}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5"><Mail className="w-3 h-3" /> Email</p>
-                    <p className="text-sm font-medium text-foreground" data-testid="text-customer-email">{regData.customerEmail}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5"><Phone className="w-3 h-3" /> Mobile</p>
-                    <p className="text-sm font-medium text-foreground" data-testid="text-customer-phone">{regData.customerPhone}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div className="rounded-lg border border-card-border bg-card p-4">
