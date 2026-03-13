@@ -276,7 +276,7 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(today));
   const [selectedLocationId, setSelectedLocationId] = useState<string>("");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [regData, setRegData] = useState<{ customerName: string; businessName: string; customerEmail: string; customerPhone: string } | null>(null);
+  const [regData, setRegData] = useState<{ customerName: string; businessName: string; customerEmail: string; customerPhone: string; firstName: string } | null>(null);
 
   const { data: locationsData, isLoading: locationsLoading } = useQuery<{
     locations: Location[];
@@ -318,7 +318,7 @@ export default function Home() {
       form.setValue("businessName", businessName);
       form.setValue("customerEmail", customerEmail);
       form.setValue("customerPhone", customerPhone);
-      setRegData({ customerName, businessName, customerEmail, customerPhone });
+      setRegData({ customerName, businessName, customerEmail, customerPhone, firstName: reg.firstName ?? "" });
     } catch {}
   }, []);
 
@@ -456,7 +456,7 @@ export default function Home() {
 
       <div className="max-w-6xl mx-auto w-full px-5 py-4 flex-1">
         <p className="text-sm text-muted-foreground mb-4">
-          Schedule your 20 minute meeting with a Store Manager to learn everything you need to know about the profit structure, volume rebates and portal and how we service you and your customer.
+          {regData?.firstName && <span className="font-medium text-foreground">{regData.firstName}, </span>}Schedule your 20 minute meeting to learn everything you need to know about the profit structure, volume rebates and portal and how we service you and your customer.
         </p>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
