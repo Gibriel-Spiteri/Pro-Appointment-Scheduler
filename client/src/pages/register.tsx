@@ -46,13 +46,12 @@ const US_STATES = [
 ];
 
 const BUSINESS_TYPES = [
-  "Contractor",
-  "Builder / Remodeler",
+  "Licensed Contractor",
+  "Builder",
   "Property Manager",
   "Retailer / Dealer",
   "Architect / Designer",
   "Developer",
-  "Distributor",
   "Other",
 ];
 
