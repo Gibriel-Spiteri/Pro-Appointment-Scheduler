@@ -3,7 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation } from "wouter";
-import { CalendarDays, User, Building2, Mail, Phone, MapPin, Briefcase } from "lucide-react";
+import { User, Building2, Mail, Phone, MapPin, Briefcase } from "lucide-react";
+import headerImg from "@assets/Consumers_Wholesale_1773370886421.jpg";
 import {
   Form,
   FormControl,
@@ -93,17 +94,15 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card px-5 py-3 sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto flex items-center gap-2.5">
-          <CalendarDays className="w-5 h-5 text-primary" />
-          <h1 className="text-base font-semibold text-foreground">Appointment Scheduler</h1>
+      <header className="border-b border-border bg-white sticky top-0 z-50">
+        <div className="max-w-3xl mx-auto px-5 py-3">
+          <img src={headerImg} alt="Register for CONSUMERS Wholesale PROgram" className="h-10 w-auto" />
         </div>
       </header>
 
       <div className="max-w-3xl mx-auto w-full px-5 py-8 flex-1">
-        <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-[#01426A]">Register for the Consumers Wholesale PROgram</h2>
-          <p className="text-sm text-muted-foreground mt-1">
+        <div className="mb-6">
+          <p className="text-sm text-muted-foreground">
             Please fill in your information to schedule an appointment with one of our representatives.
           </p>
         </div>
