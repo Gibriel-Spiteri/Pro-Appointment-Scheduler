@@ -447,16 +447,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card px-5 py-4 sticky top-0 z-50">
+      <header className="border-b border-border bg-card px-5 py-3 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex items-center gap-2.5">
-          <CalendarDays className="w-5 h-5 text-primary shrink-0" />
-          <h1 className="text-base font-semibold text-foreground">
-            {regData?.firstName && <span>{regData.firstName}, </span>}Schedule your 20 minute meeting to learn everything you need to know about the profit structure, volume rebates and portal and how we service you and your customer.
-          </h1>
+          <CalendarDays className="w-5 h-5 text-primary" />
+          <h1 className="text-base font-semibold text-foreground">Appointment Scheduler</h1>
         </div>
       </header>
 
       <div className="max-w-6xl mx-auto w-full px-5 py-4 flex-1">
+        <p className="text-sm text-muted-foreground mb-4">
+          {regData?.firstName && <span className="font-medium text-foreground">{regData.firstName}, </span>}Schedule your 20 minute meeting to learn everything you need to know about the profit structure, volume rebates and portal and how we service you and your customer.
+        </p>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
