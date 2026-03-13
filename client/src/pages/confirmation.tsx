@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { CalendarDays, Clock, MapPin, User, Building2, Mail, Phone, UserCheck, Eye } from "lucide-react";
+import { CalendarDays, Clock, MapPin, User, Building2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AppointmentSummary {
@@ -45,38 +45,32 @@ export default function Confirmation() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card px-6 py-4">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-semibold text-foreground text-center" data-testid="text-confirmation-title">Appointment Confirmed!</h1>
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-2xl font-semibold text-foreground text-center" data-testid="text-confirmation-title">
+            Appointment Confirmed!
+          </h1>
         </div>
       </header>
 
-      <div className="flex-1 flex items-start justify-center px-6 pt-10 pb-4">
-        <div className="w-full max-w-lg">
-          <div className="flex flex-col items-center text-center mb-8">
-            <p className="text-muted-foreground text-sm">
-              Your appointment has been successfully booked. You will receive a confirmation shortly.
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-card-border bg-card p-6 space-y-5">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-primary" />
-              Appointment Summary
-            </h3>
-
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <CalendarDays className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Date</p>
-                  <p className="text-sm font-medium text-foreground" data-testid="text-summary-date">
-                    {formatDate(appointment.appointmentDate)}
-                  </p>
-                </div>
+      <div className="flex-1 flex items-start justify-center px-6 pt-8 pb-8">
+        <div className="w-full max-w-2xl">
+          <div className="rounded-xl border border-card-border bg-card overflow-hidden shadow-sm">
+            <div className="bg-primary px-6 py-5">
+              <div className="flex items-center gap-2 text-primary-foreground/80 text-xs mb-1">
+                <CalendarDays className="w-3.5 h-3.5" />
+                <span>Appointment Invitation</span>
               </div>
+              <h2 className="text-xl font-bold text-primary-foreground">
+                Consumers Wholesale PROgram Meeting
+              </h2>
+              <p className="text-primary-foreground/80 text-sm mt-1">
+                {formatDate(appointment.appointmentDate)}
+              </p>
+            </div>
 
+            <div className="px-6 py-5 space-y-4">
               <div className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Time</p>
                   <p className="text-sm font-medium text-foreground" data-testid="text-summary-time">
@@ -85,20 +79,8 @@ export default function Confirmation() {
                 </div>
               </div>
 
-              {appointment.salesPersonName && (
-                <div className="flex items-start gap-3">
-                  <UserCheck className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Scheduled with</p>
-                    <p className="text-sm font-medium text-foreground" data-testid="text-summary-salesperson">
-                      {appointment.salesPersonName}
-                    </p>
-                  </div>
-                </div>
-              )}
-
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Location</p>
                   <p className="text-sm font-medium text-foreground" data-testid="text-summary-location">
@@ -107,51 +89,51 @@ export default function Confirmation() {
                 </div>
               </div>
 
-              <div className="border-t border-border pt-4 space-y-3">
+              {appointment.salesPersonName && (
                 <div className="flex items-start gap-3">
-                  <User className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <User className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Name</p>
+                    <p className="text-xs text-muted-foreground">Meeting with</p>
+                    <p className="text-sm font-medium text-foreground" data-testid="text-summary-salesperson">
+                      {appointment.salesPersonName}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground mb-3">Attendee</p>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <User className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
                     <p className="text-sm font-medium text-foreground" data-testid="text-summary-name">
                       {appointment.customerName}
                     </p>
-                  </div>
-                </div>
-
-                {appointment.businessName && (
-                  <div className="flex items-start gap-3">
-                    <Building2 className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Business</p>
-                      <p className="text-sm font-medium text-foreground" data-testid="text-summary-business">
-                        {appointment.businessName}
+                    {appointment.businessName && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5" data-testid="text-summary-business">
+                        <Building2 className="w-3 h-3" /> {appointment.businessName}
                       </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-start gap-3">
-                  <Mail className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="text-sm font-medium text-foreground" data-testid="text-summary-email">
+                    )}
+                    <p className="text-xs text-muted-foreground mt-0.5" data-testid="text-summary-email">
                       {appointment.customerEmail}
                     </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Phone className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Phone</p>
-                    <p className="text-sm font-medium text-foreground" data-testid="text-summary-phone">
+                    <p className="text-xs text-muted-foreground mt-0.5" data-testid="text-summary-phone">
                       {appointment.customerPhone}
                     </p>
                   </div>
                 </div>
               </div>
+
+              <div className="border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  You're invited to a 20-minute meeting with a Store Manager to learn about the profit structure, volume rebates, portal access, and how we service you and your customer. A calendar invite will be sent to your email shortly.
+                </p>
+              </div>
             </div>
           </div>
+
           <div className="flex justify-center mt-6">
             <Button
               type="button"
