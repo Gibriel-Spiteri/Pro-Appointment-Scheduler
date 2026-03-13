@@ -58,8 +58,6 @@ export default function AppointmentPreview() {
 
   if (!appointment) return null;
 
-  const firstName = appointment.customerName.split(" ")[0];
-
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <div className="border-b border-stone-200 bg-white px-6 py-3 flex items-center">
@@ -75,62 +73,6 @@ export default function AppointmentPreview() {
           Back
         </Button>
       </div>
-
-      <section className="border-b border-stone-200 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-24">
-          <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-            <div>
-              <div className="inline-flex rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-stone-600">
-                Appointment confirmed
-              </div>
-              <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-tight md:text-6xl md:leading-[1.02]">
-                This is the meeting that shows you what the <span className="text-amber-700">PROgram</span> is actually worth.
-              </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-600 md:text-xl">
-                In just 20 minutes, you'll see the pricing, rebates, tools, and service advantages that can help you protect margin, simplify ordering, and look stronger in front of your customers.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                {[
-                  "See the numbers clearly",
-                  "Understand the rebate opportunity",
-                  "Leave with practical takeaways",
-                ].map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-stone-300 bg-stone-100 px-4 py-2 text-sm text-stone-700"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[2rem] border border-stone-200 bg-stone-900 p-6 text-white shadow-2xl shadow-stone-300/40">
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-7 backdrop-blur">
-                <p className="text-sm uppercase tracking-[0.22em] text-white/55">Why keep this appointment</p>
-                <h2 className="mt-4 text-3xl font-semibold leading-tight">
-                  Most contractors walk away seeing value they didn't know they were missing.
-                </h2>
-                <div className="mt-8 space-y-4">
-                  {[
-                    "How contractor pricing affects your bottom line",
-                    "How volume rebates can add up over time",
-                    "How our team supports both you and your customer",
-                  ].map((item) => (
-                    <div key={item} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm leading-6 text-white/85">
-                      {item}
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-8 rounded-2xl bg-amber-600 px-5 py-4 text-base font-medium text-white">
-                  Just 20 minutes. Big impact.
-                </div>
-                <p className="mt-4 text-sm text-white/60">We're looking forward to meeting with you, {firstName}.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <section className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-24">
         <div className="mb-12 max-w-2xl">
