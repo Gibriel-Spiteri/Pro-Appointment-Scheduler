@@ -162,53 +162,6 @@ export default function Register() {
                 />
                 <FormField
                   control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-medium flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span className="text-foreground">Email Address</span>
-                        <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder="john@example.com"
-                          data-testid="input-email"
-                          autoComplete="off"
-                          className="text-sm"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="mobile"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-medium flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span className="text-foreground">Mobile Number</span>
-                        <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="(555) 000-0000"
-                          data-testid="input-mobile"
-                          autoComplete="off"
-                          className="text-sm"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="businessName"
                   render={({ field }) => (
                     <FormItem>
@@ -355,6 +308,53 @@ export default function Register() {
                     )}
                   />
                 </div>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-foreground">Email Address</span>
+                        <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="john@example.com"
+                          data-testid="input-email"
+                          autoComplete="off"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="mobile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-foreground">Mobile Number</span>
+                        <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="(555) 000-0000"
+                          data-testid="input-mobile"
+                          autoComplete="off"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
