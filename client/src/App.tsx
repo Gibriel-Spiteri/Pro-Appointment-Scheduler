@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import Confirmation from "@/pages/confirmation";
 import NetSuite from "@/pages/netsuite";
 import Register from "@/pages/register";
+import AppointmentPreview from "@/pages/appointment-preview";
 
 function Router() {
   return (
@@ -15,6 +16,7 @@ function Router() {
       <Route path="/" component={Register} />
       <Route path="/schedule" component={Home} />
       <Route path="/confirmation" component={Confirmation} />
+      <Route path="/appointment-preview" component={AppointmentPreview} />
       <Route path="/netsuite" component={NetSuite} />
       <Route component={NotFound} />
     </Switch>
