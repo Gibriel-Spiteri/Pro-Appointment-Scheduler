@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation } from "wouter";
-import { User, Building2, Mail, Phone, MapPin, Briefcase } from "lucide-react";
+import { User, Building2, Mail, Phone, MapPin, Briefcase, Lock } from "lucide-react";
 import headerImg from "@assets/Consumers_Wholesale_1773370886421.jpg";
 import {
   Form,
@@ -34,6 +34,11 @@ const registrationSchema = z.object({
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
   zip: z.string().min(5, "Please enter a valid ZIP code"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 type RegistrationData = z.infer<typeof registrationSchema>;
@@ -74,6 +79,8 @@ export default function Register() {
       city: "",
       state: "NY",
       zip: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -88,7 +95,8 @@ export default function Register() {
   }, []);
 
   function onSubmit(data: RegistrationData) {
-    sessionStorage.setItem(PRO_REGISTRATION_KEY, JSON.stringify(data));
+    const { password, confirmPassword, ...profileData } = data;
+    sessionStorage.setItem(PRO_REGISTRATION_KEY, JSON.stringify(profileData));
     navigate("/schedule");
   }
 
@@ -342,6 +350,54 @@ export default function Register() {
                           placeholder="(555) 000-0000"
                           data-testid="input-mobile"
                           autoComplete="off"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-foreground">Create Password</span>
+                        <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="password"
+                          placeholder="Min. 8 characters"
+                          data-testid="input-password"
+                          autoComplete="new-password"
+                          className="text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-foreground">Confirm Password</span>
+                        <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="password"
+                          placeholder="Re-enter password"
+                          data-testid="input-confirm-password"
+                          autoComplete="new-password"
                           className="text-sm"
                         />
                       </FormControl>
