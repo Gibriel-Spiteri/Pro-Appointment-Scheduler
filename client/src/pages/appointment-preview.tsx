@@ -73,7 +73,6 @@ export default function AppointmentPreview() {
           Back
         </Button>
       </div>
-
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-10 md:py-14">
         <div className="mb-8 max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">What you'll cover</p>
@@ -110,12 +109,11 @@ export default function AppointmentPreview() {
           ))}
         </div>
       </section>
-
       <section className="bg-stone-900 text-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10 md:flex-row md:items-center md:justify-between md:px-10">
           <div className="max-w-2xl">
             <p className="text-xs uppercase tracking-[0.22em] text-white/50">Final reminder</p>
-            <h3 className="mt-2 text-xl font-semibold tracking-tight md:text-2xl">
+            <h3 className="mt-2 font-semibold tracking-tight md:text-2xl text-[22px]">
               You already booked the time. Show up and see what's possible.
             </h3>
             <p className="mt-3 text-sm leading-6 text-white/70">
