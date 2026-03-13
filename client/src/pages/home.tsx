@@ -615,7 +615,15 @@ export default function Home() {
             </div>
 
             <div className="flex items-center justify-between pt-1 pb-2">
-              <div />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                data-testid="button-back"
+                onClick={() => navigate("/")}
+              >
+                Back
+              </Button>
               <div className="flex items-center gap-3">
                 <Button
                   type="button"
