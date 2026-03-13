@@ -45,18 +45,14 @@ export default function Confirmation() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card px-6 py-4">
-        <div className="max-w-3xl mx-auto flex items-center gap-3">
-          <CalendarDays className="w-5 h-5 text-primary" />
-          <h1 className="text-lg font-semibold text-foreground">Appointment Scheduler</h1>
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-2xl font-semibold text-foreground" data-testid="text-confirmation-title">Appointment Confirmed!</h1>
         </div>
       </header>
 
       <div className="flex-1 flex items-start justify-center px-6 pt-10 pb-4">
         <div className="w-full max-w-lg">
           <div className="flex flex-col items-center text-center mb-8">
-            <h2 className="text-2xl font-semibold text-foreground mb-1" data-testid="text-confirmation-title">
-              Appointment Confirmed!
-            </h2>
             <p className="text-muted-foreground text-sm">
               Your appointment has been successfully booked. You will receive a confirmation shortly.
             </p>
