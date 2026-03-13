@@ -276,6 +276,7 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(today));
   const [selectedLocationId, setSelectedLocationId] = useState<string>("");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [regData, setRegData] = useState<{ customerName: string; businessName: string; customerEmail: string; customerPhone: string } | null>(null);
 
   const { data: locationsData, isLoading: locationsLoading } = useQuery<{
     locations: Location[];
@@ -309,10 +310,15 @@ export default function Home() {
     }
     try {
       const reg = JSON.parse(stored);
-      form.setValue("customerName", `${reg.firstName ?? ""} ${reg.lastName ?? ""}`.trim());
-      form.setValue("businessName", reg.businessName ?? "");
-      form.setValue("customerEmail", reg.email ?? "");
-      form.setValue("customerPhone", reg.mobile ?? "");
+      const customerName = `${reg.firstName ?? ""} ${reg.lastName ?? ""}`.trim();
+      const businessName = reg.businessName ?? "";
+      const customerEmail = reg.email ?? "";
+      const customerPhone = reg.mobile ?? "";
+      form.setValue("customerName", customerName);
+      form.setValue("businessName", businessName);
+      form.setValue("customerEmail", customerEmail);
+      form.setValue("customerPhone", customerPhone);
+      setRegData({ customerName, businessName, customerEmail, customerPhone });
     } catch {}
   }, []);
 
@@ -452,107 +458,40 @@ export default function Home() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="rounded-lg border border-card-border bg-card p-4">
-              <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                <User className="w-4 h-4 text-primary" />
-                Customer Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                <FormField
-                  control={form.control}
-                  name="customerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5" /> <span className="text-foreground">Full Name</span> <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="John Smith"
-                          data-testid="input-customer-name"
-                          autoComplete="off"
-                          className="text-xs h-8"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="businessName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Building2 className="w-3.5 h-3.5" /> <span className="text-foreground">Business Name</span> <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Company name"
-                          data-testid="input-business-name"
-                          autoComplete="off"
-                          className="text-xs h-8"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="customerEmail"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5" /> <span className="text-foreground">Email Address</span> <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder="john@example.com"
-                          data-testid="input-customer-email"
-                          autoComplete="off"
-                          className="text-xs h-8"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="customerPhone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5" /> <span className="text-foreground">Mobile Number</span> <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="tel"
-                          placeholder="(631) 555-0100"
-                          data-testid="input-customer-phone"
-                          autoComplete="off"
-                          className="text-xs h-8"
-                          onChange={(e) => {
-                            const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
-                            let formatted = digits;
-                            if (digits.length > 6) {
-                              formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-                            } else if (digits.length > 3) {
-                              formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-                            } else if (digits.length > 0) {
-                              formatted = `(${digits}`;
-                            }
-                            field.onChange(formatted);
-                          }}
-                          maxLength={14}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <User className="w-4 h-4 text-primary" />
+                  Customer Information
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => navigate("/")}
+                  className="text-xs text-primary hover:underline"
+                  data-testid="link-edit-registration"
+                >
+                  Edit
+                </button>
               </div>
+              {regData && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5"><User className="w-3 h-3" /> Full Name</p>
+                    <p className="text-sm font-medium text-foreground" data-testid="text-customer-name">{regData.customerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5"><Building2 className="w-3 h-3" /> Business</p>
+                    <p className="text-sm font-medium text-foreground" data-testid="text-business-name">{regData.businessName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5"><Mail className="w-3 h-3" /> Email</p>
+                    <p className="text-sm font-medium text-foreground" data-testid="text-customer-email">{regData.customerEmail}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5"><Phone className="w-3 h-3" /> Mobile</p>
+                    <p className="text-sm font-medium text-foreground" data-testid="text-customer-phone">{regData.customerPhone}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
