@@ -7,11 +7,13 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Confirmation from "@/pages/confirmation";
 import NetSuite from "@/pages/netsuite";
+import Register from "@/pages/register";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={Register} />
+      <Route path="/schedule" component={Home} />
       <Route path="/confirmation" component={Confirmation} />
       <Route path="/netsuite" component={NetSuite} />
       <Route component={NotFound} />

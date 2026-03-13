@@ -265,6 +265,8 @@ function TimeSlotGrid({
   );
 }
 
+const PRO_REGISTRATION_KEY = "proRegistration";
+
 export default function Home() {
   const { toast } = useToast();
   const [, navigate] = useLocation();
@@ -298,6 +300,21 @@ export default function Home() {
       duration: DURATION,
     },
   });
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(PRO_REGISTRATION_KEY);
+    if (!stored) {
+      navigate("/");
+      return;
+    }
+    try {
+      const reg = JSON.parse(stored);
+      form.setValue("customerName", `${reg.firstName ?? ""} ${reg.lastName ?? ""}`.trim());
+      form.setValue("businessName", reg.businessName ?? "");
+      form.setValue("customerEmail", reg.email ?? "");
+      form.setValue("customerPhone", reg.mobile ?? "");
+    } catch {}
+  }, []);
 
   const dateStr = toLocalDateStr(selectedDate);
 
@@ -396,7 +413,27 @@ export default function Home() {
     setSelectedSlot(null);
     setSelectedDate(new Date(today));
     setSelectedLocationId("");
-    form.reset();
+    const stored = sessionStorage.getItem(PRO_REGISTRATION_KEY);
+    let prefill = { customerName: "", businessName: "", customerEmail: "", customerPhone: "" };
+    if (stored) {
+      try {
+        const reg = JSON.parse(stored);
+        prefill = {
+          customerName: `${reg.firstName ?? ""} ${reg.lastName ?? ""}`.trim(),
+          businessName: reg.businessName ?? "",
+          customerEmail: reg.email ?? "",
+          customerPhone: reg.mobile ?? "",
+        };
+      } catch {}
+    }
+    form.reset({
+      ...prefill,
+      location: "",
+      appointmentDate: toLocalDateStr(today),
+      startTime: "",
+      endTime: "",
+      duration: DURATION,
+    });
   };
 
   const formatDisplayDate = (d: Date) =>
