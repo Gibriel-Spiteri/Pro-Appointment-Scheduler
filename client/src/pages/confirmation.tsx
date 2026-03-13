@@ -155,7 +155,7 @@ export default function Confirmation() {
           <div className="flex justify-center mt-6">
             <Button
               type="button"
-              variant="outline"
+              variant="default"
               data-testid="button-appt-preview"
               onClick={() => navigate("/appointment-preview")}
               className="flex items-center gap-2"
