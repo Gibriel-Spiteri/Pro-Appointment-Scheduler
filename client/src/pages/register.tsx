@@ -101,11 +101,6 @@ export default function Register() {
       </header>
 
       <div className="max-w-3xl mx-auto w-full px-5 py-8 flex-1">
-        <div className="mb-6">
-          <p className="text-sm text-muted-foreground">
-            Please fill in your information to schedule an appointment with one of our representatives.
-          </p>
-        </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
