@@ -74,33 +74,33 @@ export default function AppointmentPreview() {
         </Button>
       </div>
 
-      <section className="mx-auto max-w-7xl px-6 py-16 md:px-10 md:py-24">
-        <div className="mb-12 max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-700">What you'll cover</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-5xl">
+      <section className="mx-auto max-w-7xl px-6 py-10 md:px-10 md:py-14">
+        <div className="mb-8 max-w-2xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">What you'll cover</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight md:text-3xl">
             A quick meeting with real business upside.
           </h2>
-          <p className="mt-4 text-lg leading-8 text-stone-600">
+          <p className="mt-3 text-sm leading-6 text-stone-600">
             This is not a generic overview. It's a focused walkthrough of the pieces that can directly impact your profit, process, and customer experience.
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           {sections.map((section) => (
             <div
               key={section.title}
-              className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-lg shadow-stone-200/50 transition hover:-translate-y-1"
+              className="rounded-2xl border border-stone-200 bg-white p-6 shadow-lg shadow-stone-200/50 transition hover:-translate-y-1"
             >
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
                 {section.eyebrow}
               </p>
-              <h3 className="mt-4 text-2xl font-semibold leading-tight">{section.title}</h3>
-              <p className="mt-4 text-base leading-7 text-stone-600">{section.body}</p>
-              <div className="mt-6 flex flex-wrap gap-2">
+              <h3 className="mt-3 text-base font-semibold leading-tight">{section.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-stone-600">{section.body}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
                 {section.bullets.map((bullet) => (
                   <span
                     key={bullet}
-                    className="rounded-full border border-stone-300 px-4 py-2 text-sm text-stone-700"
+                    className="rounded-full border border-stone-300 px-3 py-1 text-xs text-stone-700"
                   >
                     {bullet}
                   </span>
@@ -112,17 +112,17 @@ export default function AppointmentPreview() {
       </section>
 
       <section className="bg-stone-900 text-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-16 md:flex-row md:items-center md:justify-between md:px-10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10 md:flex-row md:items-center md:justify-between md:px-10">
           <div className="max-w-2xl">
-            <p className="text-sm uppercase tracking-[0.22em] text-white/50">Final reminder</p>
-            <h3 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+            <p className="text-xs uppercase tracking-[0.22em] text-white/50">Final reminder</p>
+            <h3 className="mt-2 text-xl font-semibold tracking-tight md:text-2xl">
               You already booked the time. Show up and see what's possible.
             </h3>
-            <p className="mt-4 text-lg leading-8 text-white/70">
+            <p className="mt-3 text-sm leading-6 text-white/70">
               Better margins, rebate potential, easier account management, and stronger contractor support all start with this conversation.
             </p>
           </div>
-          <button className="rounded-2xl bg-amber-600 px-7 py-4 text-base font-semibold text-white transition hover:scale-[1.02]">
+          <button className="rounded-xl bg-amber-600 px-6 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]">
             I'll Be There
           </button>
         </div>
