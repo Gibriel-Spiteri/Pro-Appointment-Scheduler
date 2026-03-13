@@ -51,7 +51,7 @@ export default function Confirmation() {
         </div>
       </header>
 
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="flex-1 flex items-center justify-center px-6 py-4">
         <div className="w-full max-w-lg">
           <div className="flex flex-col items-center text-center mb-8">
             <h2 className="text-2xl font-semibold text-foreground mb-1" data-testid="text-confirmation-title">
