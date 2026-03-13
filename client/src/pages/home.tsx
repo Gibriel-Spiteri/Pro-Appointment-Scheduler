@@ -455,6 +455,9 @@ export default function Home() {
       </header>
 
       <div className="max-w-6xl mx-auto w-full px-5 py-4 flex-1">
+        <p className="text-sm text-muted-foreground mb-4">
+          Schedule your 20 minute meeting with a Store Manager to learn everything you need to know about the profit structure, volume rebates and portal and how we service you and your customer.
+        </p>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="rounded-lg border border-card-border bg-card p-4">
