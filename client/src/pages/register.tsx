@@ -358,7 +358,7 @@ export default function Register() {
                 data-testid="button-continue"
                 className="px-8"
               >
-                Continue to Schedule Appointment
+                Register
               </Button>
             </div>
           </form>
