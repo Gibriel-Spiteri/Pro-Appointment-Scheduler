@@ -113,7 +113,7 @@ export default function Register() {
             <div className="rounded-lg border border-card-border bg-card p-5">
               <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <User className="w-4 h-4 text-primary" />
-                Personal Information
+                Your Information
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -207,15 +207,6 @@ export default function Register() {
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-card-border bg-card p-5">
-              <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-primary" />
-                Business Information
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="businessName"
