@@ -469,7 +469,7 @@ export default function Home() {
               ))}
             </ul>
             <div className="px-4 py-3 flex flex-col justify-center gap-1">
-              <p className="text-sm font-medium text-foreground">No obligation. No membership fee.</p>
+              <p className="text-sm font-medium text-foreground text-center">No obligation. No membership fee.</p>
               <p className="text-sm text-muted-foreground">See the numbers. Decide for yourself.</p>
             </div>
           </div>
