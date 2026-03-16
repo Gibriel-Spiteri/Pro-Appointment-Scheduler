@@ -105,7 +105,7 @@ export default function Register() {
       <header className="border-b border-border bg-white sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-5 py-3 flex justify-center">
           <h1
-            className="text-2xl tracking-wide uppercase"
+            className="text-2xl tracking-wide"
             style={{ color: "#01426a", fontFamily: "'Outfit', sans-serif", fontWeight: 700, letterSpacing: "0.03em" }}
           >
             Register for CONSUMERS Wholesale PROgram
