@@ -54,12 +54,11 @@ export default function Confirmation() {
           </h1>
         </div>
       </header>
-
       <div className="max-w-3xl mx-auto w-full px-5 py-4 flex-1">
 
         <div className="mb-4 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40">
-            <p className="text-sm text-center" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
+            <p className="text-center font-extrabold text-[20px]" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
               Consumers Wholesale PROgram Meeting
             </p>
           </div>
