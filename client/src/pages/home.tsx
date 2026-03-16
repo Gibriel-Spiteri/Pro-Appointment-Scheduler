@@ -450,7 +450,7 @@ export default function Home() {
       <div className="max-w-6xl mx-auto w-full px-5 py-2 flex-1">
         <div className="mb-5 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40">
-            <p className="text-sm font-semibold text-foreground">
+            <p className="text-sm font-semibold text-foreground text-center">
               {regData?.firstName && <span>{regData.firstName}, </span>}Schedule your 20-minute meeting to learn:
             </p>
           </div>
