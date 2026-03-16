@@ -68,7 +68,7 @@ export default function Confirmation() {
         </div>
 
         <div className="rounded-lg border border-card-border bg-card p-4 space-y-4">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Appointment Details</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#171717]">Appointment Details</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
