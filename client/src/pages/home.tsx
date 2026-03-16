@@ -462,7 +462,7 @@ export default function Home() {
                 "Everything you can do in the PROportal",
                 "And how we service you and your customer",
               ].map((item) => (
-                <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <li key={item} className="flex items-start gap-2 text-sm text-[#171717]">
                   <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                   {item}
                 </li>
