@@ -115,7 +115,7 @@ export default function Confirmation() {
           </div>
 
           <div className="border-t border-border pt-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider mb-3 text-[#171717]">Your Information</h3>
+            <h3 className="text-xs uppercase tracking-wider mb-3 text-[#171717] font-bold">Your Information</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
                 <User className="w-4 h-4 text-primary mt-0.5 shrink-0" />
