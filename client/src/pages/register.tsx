@@ -104,7 +104,9 @@ export default function Register() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-white sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-5 py-3 flex justify-center">
-          <img src={headerImg} alt="Register for CONSUMERS Wholesale PROgram" className="h-[60px] w-auto" />
+          <h1 className="text-xl font-bold tracking-tight" style={{ color: "#01426a" }}>
+            Register for CONSUMERS Wholesale PROgram
+          </h1>
         </div>
       </header>
 
