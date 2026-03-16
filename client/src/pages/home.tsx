@@ -455,12 +455,14 @@ export default function Home() {
       </header>
 
       <div className="max-w-6xl mx-auto w-full px-5 py-4 flex-1">
-        <div className="mb-5">
-          <p className="text-base font-semibold text-foreground mb-3">
-            {regData?.firstName && <span>{regData.firstName}, </span>}Schedule your 20-minute meeting to learn:
-          </p>
-          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-            <ul className="space-y-1.5 flex-1">
+        <div className="mb-5 rounded-lg border border-border bg-muted/30 overflow-hidden">
+          <div className="px-4 py-3 border-b border-border bg-muted/40">
+            <p className="text-sm font-semibold text-foreground">
+              {regData?.firstName && <span>{regData.firstName}, </span>}Schedule your 20-minute meeting to learn:
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
+            <ul className="space-y-2 px-4 py-3">
               {[
                 "Everything you need to know about the profit structure",
                 "How the volume rebates work",
@@ -468,18 +470,14 @@ export default function Home() {
                 "And how we service you and your customer",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                  <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                   {item}
                 </li>
               ))}
             </ul>
-            <div className="sm:w-56 sm:border-l sm:border-border sm:pl-4 flex flex-col justify-center">
-              <p className="text-xs text-muted-foreground/70 italic leading-5">
-                No obligation. No membership fee.
-              </p>
-              <p className="text-xs text-muted-foreground/70 italic leading-5">
-                See the numbers. Decide for yourself.
-              </p>
+            <div className="px-4 py-3 flex flex-col justify-center gap-1">
+              <p className="text-sm font-medium text-foreground">No obligation. No membership fee.</p>
+              <p className="text-sm text-muted-foreground">See the numbers. Decide for yourself.</p>
             </div>
           </div>
         </div>
