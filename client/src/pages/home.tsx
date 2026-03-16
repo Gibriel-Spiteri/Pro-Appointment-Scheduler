@@ -470,7 +470,7 @@ export default function Home() {
             </ul>
             <div className="px-4 py-3 flex flex-col justify-center gap-1">
               <p className="text-sm font-medium text-foreground text-center">No obligation. No membership fee.</p>
-              <p className="text-sm text-muted-foreground text-center font-medium">See the numbers. Decide for yourself.</p>
+              <p className="text-sm text-center font-medium text-[171717]">See the numbers. Decide for yourself.</p>
             </div>
           </div>
         </div>
