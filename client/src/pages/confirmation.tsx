@@ -62,7 +62,7 @@ export default function Confirmation() {
               Consumers Wholesale PROgram Meeting
             </p>
           </div>
-          <div className="px-4 py-3 text-sm text-muted-foreground text-center">
+          <div className="px-4 py-3 text-muted-foreground text-center text-[16px]">
             {formatDate(appointment.appointmentDate)}
           </div>
         </div>
