@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { CalendarDays, Clock, MapPin, User, Building2, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CalendarDays, Clock, MapPin, User, Building2 } from "lucide-react";
 
 interface AppointmentSummary {
   customerName: string;
@@ -133,18 +132,6 @@ export default function Confirmation() {
             </div>
           </div>
 
-          <div className="flex justify-center mt-6">
-            <Button
-              type="button"
-              variant="default"
-              data-testid="button-appt-preview"
-              onClick={() => navigate("/appointment-preview")}
-              className="flex items-center gap-2"
-            >
-              <Eye className="w-4 h-4" />
-              See Appointment Preview
-            </Button>
-          </div>
         </div>
       </div>
     </div>

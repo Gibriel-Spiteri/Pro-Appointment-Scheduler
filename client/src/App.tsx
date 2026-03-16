@@ -8,13 +8,11 @@ import Home from "@/pages/home";
 import Confirmation from "@/pages/confirmation";
 import NetSuite from "@/pages/netsuite";
 import Register from "@/pages/register";
-import AppointmentPreview from "@/pages/appointment-preview";
 
 const PAGES = [
   { label: "Register", path: "/" },
   { label: "Schedule", path: "/schedule" },
   { label: "Confirmation", path: "/confirmation" },
-  { label: "Appointment Preview", path: "/appointment-preview" },
 ];
 
 const SAMPLE_APPOINTMENT = {
@@ -48,7 +46,7 @@ function DebugNav() {
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const path = e.target.value;
-    if (path === "/confirmation" || path === "/appointment-preview") {
+    if (path === "/confirmation") {
       sessionStorage.setItem("lastAppointment", JSON.stringify(SAMPLE_APPOINTMENT));
     }
     if (path === "/schedule") {
@@ -81,7 +79,6 @@ function Router() {
       <Route path="/" component={Register} />
       <Route path="/schedule" component={Home} />
       <Route path="/confirmation" component={Confirmation} />
-      <Route path="/appointment-preview" component={AppointmentPreview} />
       <Route path="/netsuite" component={NetSuite} />
       <Route component={NotFound} />
     </Switch>
