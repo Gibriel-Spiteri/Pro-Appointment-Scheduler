@@ -447,13 +447,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card px-5 py-3 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex items-center gap-2.5">
-          <CalendarDays className="w-5 h-5 text-primary" />
-          <h1 className="text-base font-semibold text-foreground">Appointment Scheduler</h1>
-        </div>
-      </header>
-
       <div className="max-w-6xl mx-auto w-full px-5 py-2 flex-1">
         <div className="mb-5 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40">
