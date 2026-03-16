@@ -162,7 +162,7 @@ export default function Confirmation() {
           </div>
 
           <div className="border-t border-border pt-4">
-            <p className="text-xs text-muted-foreground leading-relaxed text-center">
+            <p className="text-xs leading-relaxed text-[#171717] text-left">
               A calendar invite will be sent to your email shortly. We look forward to meeting with you.
             </p>
           </div>
