@@ -96,30 +96,30 @@ function CalendarWidget({
 
   return (
     <div className="select-none">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <button
           type="button"
           data-testid="button-prev-month"
           onClick={prevMonth}
-          className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
+          className="w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-3.5 h-3.5" />
         </button>
-        <span className="text-sm font-semibold text-foreground">
+        <span className="text-xs font-semibold text-foreground">
           {MONTHS[month]} {year}
         </span>
         <button
           type="button"
           data-testid="button-next-month"
           onClick={nextMonth}
-          className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
+          className="w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground hover-elevate border border-border bg-background"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
-      <div className="grid grid-cols-7 mb-1">
+      <div className="grid grid-cols-7 mb-0.5">
         {DAYS.map((d) => (
-          <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-1.5">
+          <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-1">
             {d}
           </div>
         ))}
@@ -142,7 +142,7 @@ function CalendarWidget({
               data-testid={`button-date-${toLocalDateStr(cell.date)}`}
               onClick={() => !isPast && cell.currentMonth && onDateSelect(cell.date)}
               className={cn(
-                "h-9 w-full flex items-center justify-center text-sm rounded-md transition-colors",
+                "h-7 w-full flex items-center justify-center text-xs rounded-md transition-colors",
                 !cell.currentMonth && "text-muted-foreground/30",
                 cell.currentMonth && isPast && "text-muted-foreground/40 cursor-not-allowed",
                 cell.currentMonth && !isPast && !isSelected && !isToday && "text-foreground hover-elevate cursor-pointer",
@@ -454,7 +454,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto w-full px-5 py-4 flex-1">
+      <div className="max-w-6xl mx-auto w-full px-5 py-2 flex-1">
         <div className="mb-5 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40">
             <p className="text-sm font-semibold text-foreground">
@@ -484,9 +484,9 @@ export default function Home() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="rounded-lg border border-card-border bg-card p-4">
-                  <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              <div className="space-y-3">
+                <div className="rounded-lg border border-card-border bg-card p-3">
+                  <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
                     <CalendarDays className="w-4 h-4 text-primary" />
                     Select Date
                   </h2>
@@ -497,15 +497,15 @@ export default function Home() {
                       setSelectedSlot(null);
                     }}
                   />
-                  <div className="mt-3 pt-3 border-t border-border">
+                  <div className="mt-2 pt-2 border-t border-border">
                     <p className="text-xs text-muted-foreground text-center">
                       {formatDisplayDate(selectedDate)}
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-card-border bg-card p-4">
-                  <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                <div className="rounded-lg border border-card-border bg-card p-3">
+                  <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-primary" />
                     Store Location
                   </h2>
