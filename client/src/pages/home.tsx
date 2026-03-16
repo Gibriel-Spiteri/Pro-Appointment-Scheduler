@@ -459,22 +459,29 @@ export default function Home() {
           <p className="text-base font-semibold text-foreground mb-3">
             {regData?.firstName && <span>{regData.firstName}, </span>}Schedule your 20-minute meeting to learn:
           </p>
-          <ul className="space-y-1.5 mb-4">
-            {[
-              "Everything you need to know about the profit structure",
-              "How the volume rebates work",
-              "Everything you can do in the PROportal",
-              "And how we service you and your customer",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                {item}
-              </li>
-            ))}
-          </ul>
-          <p className="text-xs text-muted-foreground/70 italic">
-            No obligation. No membership fee. &nbsp;·&nbsp; See the numbers. Decide for yourself.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+            <ul className="space-y-1.5 flex-1">
+              {[
+                "Everything you need to know about the profit structure",
+                "How the volume rebates work",
+                "Everything you can do in the PROportal",
+                "And how we service you and your customer",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <div className="sm:w-56 sm:border-l sm:border-border sm:pl-4 flex flex-col justify-center">
+              <p className="text-xs text-muted-foreground/70 italic leading-5">
+                No obligation. No membership fee.
+              </p>
+              <p className="text-xs text-muted-foreground/70 italic leading-5">
+                See the numbers. Decide for yourself.
+              </p>
+            </div>
+          </div>
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
