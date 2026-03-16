@@ -106,7 +106,7 @@ export default function Register() {
         <div className="max-w-3xl mx-auto px-5 py-3 flex justify-center">
           <h1
             className="text-2xl tracking-wide"
-            style={{ color: "#01426a", fontFamily: "'Outfit', sans-serif", fontWeight: 700, letterSpacing: "0.03em" }}
+            style={{ color: "#01426a", fontFamily: "'Outfit', sans-serif", fontWeight: 900, letterSpacing: "0.03em" }}
           >
             Register for CONSUMERS Wholesale PROgram
           </h1>
