@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { CalendarDays, Clock, MapPin, User, Building2 } from "lucide-react";
+import { CalendarDays, Clock, MapPin, User, Building2, Mail, Phone } from "lucide-react";
 
 interface AppointmentSummary {
   customerName: string;
@@ -43,95 +43,130 @@ export default function Confirmation() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-card px-6 py-4">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl font-semibold text-foreground text-center" data-testid="text-confirmation-title">
+      <header className="border-b border-border bg-white sticky top-0 z-50">
+        <div className="max-w-3xl mx-auto px-5 py-3 flex justify-center">
+          <h1
+            className="text-2xl tracking-wide"
+            style={{ color: "#01426a", fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}
+            data-testid="text-confirmation-title"
+          >
             Appointment Confirmed!
           </h1>
         </div>
       </header>
-      <div className="flex-1 flex items-start justify-center px-6 pt-8 pb-8">
-        <div className="w-full max-w-2xl">
-          <div className="rounded-xl border border-card-border bg-card overflow-hidden shadow-sm">
-            <div className="px-6 py-5 bg-[#005287]">
-              <div className="flex items-center gap-2 text-primary-foreground/80 text-xs mb-1">
-                <CalendarDays className="w-3.5 h-3.5" />
-                <span>Appointment Invitation</span>
+
+      <div className="max-w-3xl mx-auto w-full px-5 py-4 flex-1">
+
+        <div className="mb-4 rounded-lg border border-border bg-muted/30 overflow-hidden">
+          <div className="px-4 py-3 border-b border-border bg-muted/40">
+            <p className="text-sm text-center" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
+              Consumers Wholesale PROgram Meeting
+            </p>
+          </div>
+          <div className="px-4 py-3 text-sm text-muted-foreground text-center">
+            {formatDate(appointment.appointmentDate)}
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-card-border bg-card p-4 space-y-4">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Appointment Details</h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex items-start gap-3">
+              <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-muted-foreground">Time</p>
+                <p className="text-sm font-medium text-foreground" data-testid="text-summary-time">
+                  {appointment.startTime} – {appointment.endTime}
+                </p>
               </div>
-              <h2 className="text-xl font-bold text-primary-foreground">
-                Consumers Wholesale PROgram Meeting
-              </h2>
-              <p className="text-primary-foreground/80 text-sm mt-1">
-                {formatDate(appointment.appointmentDate)}
-              </p>
             </div>
 
-            <div className="px-6 py-5 space-y-4">
+            <div className="flex items-start gap-3">
+              <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-muted-foreground">Location</p>
+                <p className="text-sm font-medium text-foreground" data-testid="text-summary-location">
+                  {appointment.locationAddress || appointment.location}
+                </p>
+              </div>
+            </div>
+
+            {appointment.salesPersonName && (
               <div className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <User className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Time</p>
-                  <p className="text-sm font-medium text-foreground" data-testid="text-summary-time">
-                    {appointment.startTime} – {appointment.endTime}
+                  <p className="text-xs text-muted-foreground">Meeting with</p>
+                  <p className="text-sm font-medium text-foreground" data-testid="text-summary-salesperson">
+                    {appointment.salesPersonName}
                   </p>
                 </div>
               </div>
+            )}
 
-              <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Location</p>
-                  <p className="text-sm font-medium text-foreground" data-testid="text-summary-location">
-                    {appointment.locationAddress || appointment.location}
-                  </p>
-                </div>
-              </div>
-
-              {appointment.salesPersonName && (
-                <div className="flex items-start gap-3">
-                  <User className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Meeting with</p>
-                    <p className="text-sm font-medium text-foreground" data-testid="text-summary-salesperson">
-                      {appointment.salesPersonName}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="border-t border-border pt-4">
-                <p className="text-xs text-muted-foreground mb-3">Attendee</p>
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground" data-testid="text-summary-name">
-                      {appointment.customerName}
-                    </p>
-                    {appointment.businessName && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5" data-testid="text-summary-business">
-                        <Building2 className="w-3 h-3" /> {appointment.businessName}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-0.5" data-testid="text-summary-email">
-                      {appointment.customerEmail}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5" data-testid="text-summary-phone">
-                      {appointment.customerPhone}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-border pt-4">
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  You're invited to a 20-minute meeting with a Store Manager to learn about the profit structure, volume rebates, portal access, and how we service you and your customer. A calendar invite will be sent to your email shortly.
+            <div className="flex items-start gap-3">
+              <CalendarDays className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-muted-foreground">Date</p>
+                <p className="text-sm font-medium text-foreground" data-testid="text-summary-date">
+                  {formatDate(appointment.appointmentDate)}
                 </p>
               </div>
             </div>
           </div>
 
+          <div className="border-t border-border pt-4">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Your Information</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-start gap-3">
+                <User className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Name</p>
+                  <p className="text-sm font-medium text-foreground" data-testid="text-summary-name">
+                    {appointment.customerName}
+                  </p>
+                </div>
+              </div>
+
+              {appointment.businessName && (
+                <div className="flex items-start gap-3">
+                  <Building2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Business</p>
+                    <p className="text-sm font-medium text-foreground" data-testid="text-summary-business">
+                      {appointment.businessName}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-start gap-3">
+                <Mail className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="text-sm font-medium text-foreground" data-testid="text-summary-email">
+                    {appointment.customerEmail}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Phone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Phone</p>
+                  <p className="text-sm font-medium text-foreground" data-testid="text-summary-phone">
+                    {appointment.customerPhone}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-border pt-4">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              A calendar invite will be sent to your email shortly. We look forward to meeting with you.
+            </p>
+          </div>
         </div>
       </div>
     </div>
