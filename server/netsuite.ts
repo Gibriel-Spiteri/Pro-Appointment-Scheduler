@@ -414,7 +414,7 @@ export interface EmployeeDetail {
 
 export async function fetchEmployeeDetails(employeeId: string): Promise<EmployeeDetail | null> {
   const result = await executeSuiteQL(
-    `SELECT e.id, e.entityid || ' ' || e.lastname AS name, e.email
+    `SELECT e.id, e.custentity_preferred_name AS name, e.email
      FROM employee e
      WHERE e.id = ${parseInt(employeeId, 10)}`,
     1
@@ -442,7 +442,7 @@ export async function fetchAvailableEmployeeForSlot(
   const scheduledResult = await executeSuiteQL(
     `SELECT
        s.custrecord_sch_employee AS employeeid,
-       BUILTIN.DF(s.custrecord_sch_employee) AS employeename,
+       e.custentity_preferred_name AS employeename,
        e.email AS email,
        s.custrecord_sch_starttime AS starttime,
        s.custrecord_sch_endtime AS endtime
