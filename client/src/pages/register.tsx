@@ -30,6 +30,7 @@ const registrationSchema = z.object({
   mobile: z.string().min(10, "Please enter a valid phone number"),
   businessName: z.string().min(1, "Business name is required"),
   businessType: z.string().min(1, "Please select a business type"),
+  annualProjects: z.string().min(1, "Please select an option"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
@@ -75,6 +76,7 @@ export default function Register() {
       mobile: "",
       businessName: "",
       businessType: "",
+      annualProjects: "",
       address: "",
       city: "",
       state: "NY",
@@ -212,6 +214,32 @@ export default function Register() {
                               {type}
                             </SelectItem>
                           ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="annualProjects"
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                      <FormLabel className="text-xs font-medium flex items-center gap-1.5">
+                        <span className="text-foreground">How many kitchen or bath projects do you do a year?</span>
+                        <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-annual-projects" className="text-sm">
+                            <SelectValue placeholder="Select range..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="1-5">1–5</SelectItem>
+                          <SelectItem value="6-15">6–15</SelectItem>
+                          <SelectItem value="16-30">16–30</SelectItem>
+                          <SelectItem value="31+">31+</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
