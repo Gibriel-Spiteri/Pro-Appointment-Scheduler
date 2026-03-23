@@ -459,8 +459,8 @@ export default function Home() {
               {[
                 "Everything you need to know about the profit structure",
                 "How the volume rebates work",
-                "Everything you can do in the PROportal",
                 "And how we service you and your customer",
+                "Everything you can do in the PROportal",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm text-[#171717]">
                   <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
