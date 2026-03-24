@@ -43,18 +43,18 @@ export default function Confirmation() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-white sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-5 py-3 flex justify-center">
-          <h1
-            className="tracking-wide text-[#01426a] text-[20px]"
-            style={{ color: "#01426a", fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}
-            data-testid="text-confirmation-title"
-          >
-            You're booked. Here's what happens next:
-          </h1>
+      <div className="max-w-3xl mx-auto w-full px-5 py-5 flex-1">
+        <div className="mb-4 rounded-lg border border-border bg-muted/30 overflow-hidden">
+          <div className="px-4 py-3 border-b border-border bg-muted/40 flex flex-col items-center gap-0.5">
+            <p
+              className="text-center font-bold text-[20px] text-[#01426a]"
+              style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}
+              data-testid="text-confirmation-title"
+            >
+              You're booked. Here's what happens next:
+            </p>
+          </div>
         </div>
-      </header>
-      <div className="max-w-3xl mx-auto w-full px-5 py-4 flex-1">
 
         <div className="mb-4 rounded-lg border border-border bg-card overflow-hidden">
           <div className="divide-y divide-border">

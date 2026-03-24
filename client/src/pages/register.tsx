@@ -104,19 +104,15 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border bg-white sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-5 py-3 flex flex-col items-center gap-0.5">
-          <h1
-            className="tracking-wide text-[#01426a] text-[20px]"
-            style={{ color: "#01426a", fontFamily: "'Outfit', sans-serif", fontWeight: 900, letterSpacing: "0.03em" }}
-          >
-            Sign Up for CONSUMERS Wholesale PROgram
-          </h1>
-          <p className="text-[13px] text-muted-foreground">Takes only 2 minutes · No cost</p>
+      <div className="max-w-3xl mx-auto w-full px-5 py-5 flex-1">
+        <div className="mb-5 rounded-lg border border-border bg-muted/30 overflow-hidden">
+          <div className="px-4 py-3 border-b border-border bg-muted/40 flex flex-col items-center gap-0.5">
+            <p className="text-center font-bold text-[20px] text-[#01426a]" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
+              Sign Up for CONSUMERS Wholesale PROgram
+            </p>
+            <p className="text-[13px] text-muted-foreground">Takes only 2 minutes · No cost</p>
+          </div>
         </div>
-      </header>
-
-      <div className="max-w-3xl mx-auto w-full px-5 py-8 flex-1">
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
