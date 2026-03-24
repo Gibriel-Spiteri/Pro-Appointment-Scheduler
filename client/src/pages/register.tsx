@@ -108,7 +108,7 @@ export default function Register() {
         <div className="mb-5 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-3 py-3 border-b border-border bg-muted/40 flex flex-col items-center gap-0.5">
             <p className="text-center text-[#01426a] text-[18px] font-extrabold" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
-              Sign Up for<br className="sm:hidden" /> CONSUMERS Wholesale PROgram
+              Sign Up for CONSUMERS<br className="sm:hidden" /> Wholesale PROgram
             </p>
             <p className="text-[13px] text-muted-foreground">Takes only 2 minutes · No cost</p>
           </div>
