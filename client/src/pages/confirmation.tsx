@@ -76,6 +76,15 @@ export default function Confirmation() {
                 <p className="text-sm text-muted-foreground mt-0.5">You're about to see how contractors are selling kitchens without adding overhead</p>
               </div>
             </div>
+            <div className="px-4 py-4 flex items-start gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-xs font-bold text-primary">3</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">What to bring</p>
+                <p className="text-sm text-muted-foreground mt-0.5">Driver's License, Home Improvement License, or business documents</p>
+              </div>
+            </div>
           </div>
         </div>
 
