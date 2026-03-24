@@ -47,7 +47,7 @@ export default function Confirmation() {
         <div className="mb-4 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40 flex flex-col items-center gap-0.5">
             <p
-              className="text-center text-[#01426a] text-[18px] font-extrabold"
+              className="text-center text-[#01426a] font-extrabold text-[20px]"
               style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}
               data-testid="text-confirmation-title"
             >
