@@ -21,6 +21,15 @@ export async function createAppointmentViaRestlet(params: {
   appointmentDate: string;
   startTime: string;
   endTime: string;
+  firstName?: string;
+  lastName?: string;
+  businessType?: string;
+  annualProjects?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  password?: string;
 }): Promise<{ success: boolean; eventId?: string; emailSent?: boolean; error?: string }> {
   if (!isAppointmentRestletConfigured()) {
     log("Appointment RESTlet not configured — skipping calendar event and email. Set APPOINTMENT_RESTLET_SCRIPT_ID and APPOINTMENT_RESTLET_DEPLOY_ID environment variables.", "restlet");
@@ -42,6 +51,15 @@ export async function createAppointmentViaRestlet(params: {
       appointmentDate: params.appointmentDate,
       startTime: params.startTime,
       endTime: params.endTime,
+      firstName: params.firstName,
+      lastName: params.lastName,
+      businessType: params.businessType,
+      annualProjects: params.annualProjects,
+      address: params.address,
+      city: params.city,
+      state: params.state,
+      zip: params.zip,
+      password: params.password,
     });
 
     if (result.success) {

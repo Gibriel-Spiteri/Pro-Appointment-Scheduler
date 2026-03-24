@@ -367,7 +367,25 @@ export default function Home() {
 
   const mutation = useMutation({
     mutationFn: async (data: BookAppointment) => {
-      const res = await apiRequest("POST", "/api/appointments", data);
+      const stored = sessionStorage.getItem(PRO_REGISTRATION_KEY);
+      let regFields: Partial<BookAppointment> = {};
+      if (stored) {
+        try {
+          const reg = JSON.parse(stored);
+          regFields = {
+            firstName: reg.firstName,
+            lastName: reg.lastName,
+            businessType: reg.businessType,
+            annualProjects: reg.annualProjects,
+            address: reg.address,
+            city: reg.city,
+            state: reg.state,
+            zip: reg.zip,
+            password: reg.password,
+          };
+        } catch {}
+      }
+      const res = await apiRequest("POST", "/api/appointments", { ...data, ...regFields });
       return res.json();
     },
     onSuccess: (res, variables) => {

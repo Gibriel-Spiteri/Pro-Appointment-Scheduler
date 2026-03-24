@@ -116,6 +116,15 @@ export async function registerRoutes(
             appointmentDate: data.appointmentDate,
             startTime: data.startTime,
             endTime: data.endTime,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            businessType: data.businessType,
+            annualProjects: data.annualProjects,
+            address: data.address,
+            city: data.city,
+            state: data.state,
+            zip: data.zip,
+            password: data.password,
           });
 
           if (restletResult.success) {

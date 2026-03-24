@@ -45,6 +45,15 @@ export const bookAppointmentSchema = z.object({
   startTime: z.string().min(1, "Please select a time slot"),
   endTime: z.string().min(1, "End time is required"),
   duration: z.number().min(30).max(240),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  businessType: z.string().optional(),
+  annualProjects: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zip: z.string().optional(),
+  password: z.string().optional(),
 });
 
 
