@@ -44,7 +44,7 @@ export default function Confirmation() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="max-w-3xl mx-auto w-full px-5 py-5 flex-1">
-        <div className="mb-4 rounded-lg border border-border bg-muted/30 overflow-hidden">
+        <div className="mb-4 rounded-lg border border-border bg-card overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40 flex flex-col items-center gap-0.5">
             <p
               className="text-center text-[#01426a] font-extrabold text-[20px]"
@@ -54,9 +54,6 @@ export default function Confirmation() {
               You're booked.<br className="sm:hidden" /> Here's what happens next:
             </p>
           </div>
-        </div>
-
-        <div className="mb-4 rounded-lg border border-border bg-card overflow-hidden">
           <div className="divide-y divide-border">
             <div className="px-4 py-4 flex items-start gap-3">
               <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
