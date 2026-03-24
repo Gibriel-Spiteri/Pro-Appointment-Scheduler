@@ -1,0 +1,29 @@
+You gave me this payload:                                                                                                                                                                           
+  {                                                                                                    "action": "createAppointment",
+    "salespersonId": "12345",                                                                      
+    "salespersonEmail": "jsmith@consumerswholesale.com",                                           
+    "salespersonName": "John Smith",                                                                   "customerName": "Jane Doe",                                                                    
+    "businessName": "Doe Contracting LLC",                                                         
+    "customerEmail": "jane@doecontracting.com",                                                        "customerPhone": "5165550100",
+    "location": "Commack",                                                                             "locationId": "5",                                                                             
+    "appointmentDate": "2026-03-30",                                                                   "startTime": "10:00 AM",                                                                       
+    "endTime": "10:30 AM",                                                                             "firstName": "Jane",                                                                           
+    "lastName": "Doe",                                                                             
+    "businessType": "Licensed Contractor",                                                         
+    "annualProjects": "6-15",                                                                          "address": "123 Main St",
+    "city": "Commack",                                                                                 "state": "NY",                                                                                 
+    "zip": "11725",                                                                                
+    "password": "SecurePass123"                                                                    
+  }
+
+  But the actual payload from the web app (shown in the execution log) was:                           
+  {                                                                                                
+    "action": "createAppointment",                                                                 
+    "salespersonId": "2180123",                                                                        "salespersonEmail": "",
+    "salespersonName": "Mohamed Spiteri",                                                          
+    "customerName": "Gib Spiteri",                                                                     "businessName": "Consumers",
+    "customerEmail": "gibbyspiteri@gmail.com",                                                         "customerPhone": "6316622524",                                                                 
+    "location": "Yaphank",                                                                             "locationId": "16",                                                                            
+    "appointmentDate": "2026-03-24",                                                               
+    "startTime": "3:30 PM",                                                                            "endTime": "4:00 PM"
+  }   
