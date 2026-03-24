@@ -475,10 +475,11 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
             <ul className="space-y-2 px-4 py-3">
               {[
-                "Everything you need to know about the profit structure",
-                "How the volume rebates work",
-                "How we service you and your customer",
-                "Everything you can do in the PROportal",
+                "How you make money (margins + volume rebates)",
+                "How we design, sell, and support your jobs",
+                "How to add kitchens without adding overhead",
+                "How to use your PRO Portal and tools",
+                "Activate your PRO account and tools",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm text-[#171717]">
                   <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
