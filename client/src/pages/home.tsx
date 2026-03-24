@@ -470,7 +470,7 @@ export default function Home() {
       <div className="max-w-6xl mx-auto w-full px-5 py-2 flex-1">
         <div className="mb-5 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40">
-            <p className="text-center font-bold text-[#01426a] text-[18px]" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
+            <p className="text-center font-bold text-[#01426a] text-[20px]" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
               {regData?.firstName && <span>{regData.firstName}, </span>}Here's what you'll walk away with in 20 minutes
             </p>
           </div>
