@@ -50,7 +50,7 @@ export default function Confirmation() {
             style={{ color: "#01426a", fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}
             data-testid="text-confirmation-title"
           >
-            Appointment Confirmed!
+            You're booked. Here's what happens next:
           </h1>
         </div>
       </header>
