@@ -106,7 +106,7 @@ export default function Register() {
     <div className="min-h-screen bg-background flex flex-col">
       <div className="max-w-3xl mx-auto w-full px-5 py-5 flex-1">
         <div className="mb-5 rounded-lg border border-border bg-muted/30 overflow-hidden">
-          <div className="px-4 py-3 border-b border-border bg-muted/40 flex flex-col items-center gap-0.5">
+          <div className="px-3 py-3 border-b border-border bg-muted/40 flex flex-col items-center gap-0.5">
             <p className="text-center text-[#01426a] text-[18px] font-extrabold" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
               Sign Up for<br className="sm:hidden" /> CONSUMERS Wholesale PROgram
             </p>
