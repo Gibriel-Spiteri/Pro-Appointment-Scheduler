@@ -447,7 +447,7 @@ export default function Register() {
                 data-testid="button-continue"
                 className="px-8"
               >
-                Register
+                Create My PRO Account
               </Button>
             </div>
           </form>
