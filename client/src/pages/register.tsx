@@ -110,7 +110,7 @@ export default function Register() {
             className="tracking-wide text-[#01426a] text-[20px]"
             style={{ color: "#01426a", fontFamily: "'Outfit', sans-serif", fontWeight: 900, letterSpacing: "0.03em" }}
           >
-            Register for CONSUMERS Wholesale PROgram
+            Sign Up for CONSUMERS Wholesale PROgram
           </h1>
         </div>
       </header>
