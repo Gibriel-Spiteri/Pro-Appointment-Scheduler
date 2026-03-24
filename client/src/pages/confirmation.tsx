@@ -91,7 +91,7 @@ export default function Confirmation() {
         <div className="mb-4 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40">
             <p className="text-center font-extrabold text-[20px] text-[#01426a]" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
-              Consumers Wholesale PROgram Meeting
+              Consumers Wholesale<br className="sm:hidden" /> PROgram Meeting
             </p>
           </div>
           <div className="px-4 py-3 text-muted-foreground text-center text-[16px]">
