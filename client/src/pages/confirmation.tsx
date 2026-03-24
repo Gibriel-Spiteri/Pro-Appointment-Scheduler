@@ -64,7 +64,7 @@ export default function Confirmation() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">Check your phone and email</p>
-                <p className="text-sm text-muted-foreground mt-0.5">Your confirmation and meeting details are on the way</p>
+                <p className="text-sm text-muted-foreground mt-0.5">Your confirmation and meeting details are on the way to your phone and email</p>
               </div>
             </div>
             <div className="px-4 py-4 flex items-start gap-3">
