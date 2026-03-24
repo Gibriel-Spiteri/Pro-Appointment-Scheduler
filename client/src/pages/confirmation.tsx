@@ -56,6 +56,29 @@ export default function Confirmation() {
       </header>
       <div className="max-w-3xl mx-auto w-full px-5 py-4 flex-1">
 
+        <div className="mb-4 rounded-lg border border-border bg-card overflow-hidden">
+          <div className="divide-y divide-border">
+            <div className="px-4 py-4 flex items-start gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-xs font-bold text-primary">1</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Check your phone and email</p>
+                <p className="text-sm text-muted-foreground mt-0.5">Your confirmation and meeting details are on the way</p>
+              </div>
+            </div>
+            <div className="px-4 py-4 flex items-start gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-xs font-bold text-primary">2</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">What to expect</p>
+                <p className="text-sm text-muted-foreground mt-0.5">You're about to see how contractors are adding kitchens without adding overhead</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="mb-4 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40">
             <p className="text-center font-extrabold text-[20px]" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
