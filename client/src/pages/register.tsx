@@ -105,13 +105,14 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-white sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-5 py-3 flex justify-center">
+        <div className="max-w-3xl mx-auto px-5 py-3 flex flex-col items-center gap-0.5">
           <h1
             className="tracking-wide text-[#01426a] text-[20px]"
             style={{ color: "#01426a", fontFamily: "'Outfit', sans-serif", fontWeight: 900, letterSpacing: "0.03em" }}
           >
             Sign Up for CONSUMERS Wholesale PROgram
           </h1>
+          <p className="text-[13px] text-muted-foreground">Takes only 2 minutes</p>
         </div>
       </header>
 
