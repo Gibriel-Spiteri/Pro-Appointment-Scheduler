@@ -112,7 +112,7 @@ export default function Register() {
           >
             Sign Up for CONSUMERS Wholesale PROgram
           </h1>
-          <p className="text-[13px] text-muted-foreground">Takes only 2 minutes</p>
+          <p className="text-[13px] text-muted-foreground">Takes only 2 minutes · No cost</p>
         </div>
       </header>
 
