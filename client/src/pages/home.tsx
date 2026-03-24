@@ -451,7 +451,7 @@ export default function Home() {
         <div className="mb-5 rounded-lg border border-border bg-muted/30 overflow-hidden">
           <div className="px-4 py-3 border-b border-border bg-muted/40">
             <p className="text-center font-bold text-[20px]" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
-              {regData?.firstName && <span>{regData.firstName}, </span>}Schedule your 20-minute meeting and get:
+              {regData?.firstName && <span>{regData.firstName}, </span>}Here's what you'll walk away with in 20 minutes
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
