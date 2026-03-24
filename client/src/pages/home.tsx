@@ -385,6 +385,8 @@ export default function Home() {
           };
         } catch {}
       }
+      console.log("Registration fields from sessionStorage:", regFields);
+      console.log("Full appointment payload:", { ...data, ...regFields });
       const res = await apiRequest("POST", "/api/appointments", { ...data, ...regFields });
       return res.json();
     },

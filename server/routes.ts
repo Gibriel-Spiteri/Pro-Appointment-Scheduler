@@ -71,6 +71,7 @@ export async function registerRoutes(
 
   app.post("/api/appointments", async (req, res) => {
     try {
+      log(`Incoming appointment request body: ${JSON.stringify(req.body)}`, "appointments");
       const parsed = bookAppointmentSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
