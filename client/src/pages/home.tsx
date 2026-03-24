@@ -305,7 +305,7 @@ export default function Home() {
   useEffect(() => {
     const stored = sessionStorage.getItem(PRO_REGISTRATION_KEY);
     if (!stored) {
-      navigate("/");
+      navigate("/signup");
       return;
     }
     try {
@@ -633,7 +633,7 @@ export default function Home() {
                   variant="outline"
                   size="sm"
                   data-testid="button-back"
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/signup")}
                 >
                   Back
                 </Button>
