@@ -73,7 +73,7 @@ export default function Confirmation() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">What to expect</p>
-                <p className="text-sm text-muted-foreground mt-0.5">You're about to see how contractors are adding kitchens without adding overhead</p>
+                <p className="text-sm text-muted-foreground mt-0.5">You're about to see how contractors are selling kitchens without adding overhead</p>
               </div>
             </div>
           </div>
