@@ -51,7 +51,7 @@ export default function Confirmation() {
               style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}
               data-testid="text-confirmation-title"
             >
-              You're booked. Here's what happens next:
+              You're booked.<br className="sm:hidden" /> Here's what happens next:
             </p>
           </div>
         </div>
