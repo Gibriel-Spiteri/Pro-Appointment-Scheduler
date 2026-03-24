@@ -97,7 +97,7 @@ export default function Register() {
   }, []);
 
   function onSubmit(data: RegistrationData) {
-    const { password, confirmPassword, ...profileData } = data;
+    const { confirmPassword, ...profileData } = data;
     sessionStorage.setItem(PRO_REGISTRATION_KEY, JSON.stringify(profileData));
     navigate("/schedule");
   }
