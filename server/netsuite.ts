@@ -250,27 +250,6 @@ export interface NetSuiteSchedule {
 
 const CUSTOMER_FACING_LOCATION_IDS = [5, 2, 4, 3, 17, 16];
 
-const TEST_EMPLOYEES: Record<string, { employeeId: string; employeeName: string; email: string; startTime: string; endTime: string }[]> = {
-  "16": [
-    { employeeId: "2180123", employeeName: "Mohamed Spiteri", email: "", startTime: "8:30 AM", endTime: "5:00 PM" },
-  ],
-};
-
-function getTestSchedulesForLocation(date: string, locationId: string): NetSuiteSchedule[] {
-  const entries = TEST_EMPLOYEES[locationId];
-  if (!entries) return [];
-  const d = new Date(date);
-  const dow = d.getDay();
-  if (dow === 0 || dow === 6) return [];
-  return entries.map((e) => ({
-    employeeId: e.employeeId,
-    scheduleDate: date,
-    startTime: e.startTime,
-    endTime: e.endTime,
-    pto: false,
-    scheduleChange: false,
-  }));
-}
 
 async function fetchLocationAddress(locationId: number): Promise<string | undefined> {
   try {
@@ -359,8 +338,7 @@ export async function fetchSchedulesByDateAndLocation(
     scheduleChange: row.schedulechange === "T",
   }));
 
-  const testSchedules = getTestSchedulesForLocation(date, locationId);
-  return [...netsuiteSchedules, ...testSchedules];
+  return netsuiteSchedules;
 }
 
 export interface NetSuiteEvent {
@@ -470,26 +448,6 @@ export async function fetchAvailableEmployeeForSlot(
   );
 
   const scheduledEmployees = scheduledResult.success && scheduledResult.data ? [...scheduledResult.data] : [];
-
-  const testEntries = TEST_EMPLOYEES[locationId];
-  if (testEntries) {
-    const d = new Date(date);
-    const dow = d.getDay();
-    if (dow !== 0 && dow !== 6) {
-      for (const te of testEntries) {
-        if (!scheduledEmployees.some((r: any) => String(r.employeeid) === te.employeeId)) {
-          scheduledEmployees.push({
-            employeeid: te.employeeId,
-            employeename: te.employeeName,
-            email: te.email,
-            starttime: te.startTime,
-            endtime: te.endTime,
-            _isTest: true,
-          });
-        }
-      }
-    }
-  }
 
   if (scheduledEmployees.length === 0) {
     return null;
