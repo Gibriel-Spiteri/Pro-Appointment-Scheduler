@@ -1,10 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage, generateTimeSlotsFromSchedules, filterAvailableSlots } from "./storage";
-import { bookAppointmentSchema } from "@shared/schema";
+import { bookAppointmentSchema, createLeadSchema } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { testConnection, executeSuiteQL, validateNetSuiteConfig, fetchAvailableEmployeeForSlot } from "./netsuite";
-import { createAppointmentViaRestlet } from "./email";
+import { createAppointmentViaRestlet, createLeadViaRestlet } from "./email";
 import { log } from "./index";
 
 export async function registerRoutes(
@@ -17,6 +17,30 @@ export async function registerRoutes(
       res.json({ locations });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch locations" });
+    }
+  });
+
+  app.post("/api/leads", async (req, res) => {
+    try {
+      log(`Incoming lead request body: ${JSON.stringify(req.body)}`, "leads");
+      const parsed = createLeadSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
+      }
+
+      const data = parsed.data;
+      const leadResult = await createLeadViaRestlet(data);
+
+      if (!leadResult.success) {
+        log(`Lead creation failed: ${leadResult.error}`, "leads");
+        return res.status(502).json({ error: "lead_creation_failed", message: leadResult.error || "Failed to create lead in NetSuite" });
+      }
+
+      log(`Lead created successfully — customerId: ${leadResult.customerId || "none"}`, "leads");
+      res.status(201).json({ success: true, customerId: leadResult.customerId });
+    } catch (error: any) {
+      log(`Failed to create lead: ${error.message}`, "leads");
+      res.status(500).json({ error: "Failed to create lead" });
     }
   });
 
@@ -126,6 +150,7 @@ export async function registerRoutes(
             state: data.state,
             zip: data.zip,
             password: data.password,
+            netsuiteCustomerId: data.netsuiteCustomerId,
           });
 
           if (restletResult.success) {

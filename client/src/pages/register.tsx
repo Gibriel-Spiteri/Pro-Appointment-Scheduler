@@ -3,7 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation, Link } from "wouter";
-import { User, Building2, Mail, Phone, MapPin, Briefcase, Lock, ChevronLeft } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { User, Building2, Mail, Phone, MapPin, Briefcase, Lock, ChevronLeft, Loader2 } from "lucide-react";
 import headerImg from "@assets/Consumers_Wholesale_1773370886421.jpg";
 import {
   Form,
@@ -66,6 +69,7 @@ export const PRO_REGISTRATION_KEY = "proRegistration";
 
 export default function Register() {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
 
   const form = useForm<RegistrationData>({
     resolver: zodResolver(registrationSchema),
@@ -96,10 +100,31 @@ export default function Register() {
     }
   }, []);
 
+  const leadMutation = useMutation({
+    mutationFn: async (data: RegistrationData) => {
+      const { confirmPassword, ...payload } = data;
+      const res = await apiRequest("POST", "/api/leads", payload);
+      return res.json();
+    },
+    onSuccess: (res, variables) => {
+      const { confirmPassword, ...profileData } = variables;
+      sessionStorage.setItem(PRO_REGISTRATION_KEY, JSON.stringify({
+        ...profileData,
+        netsuiteCustomerId: res.customerId,
+      }));
+      navigate("/schedule");
+    },
+    onError: () => {
+      toast({
+        title: "Registration failed",
+        description: "We were unable to create your account. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   function onSubmit(data: RegistrationData) {
-    const { confirmPassword, ...profileData } = data;
-    sessionStorage.setItem(PRO_REGISTRATION_KEY, JSON.stringify(profileData));
-    navigate("/schedule");
+    leadMutation.mutate(data);
   }
 
   return (
@@ -455,8 +480,16 @@ export default function Register() {
                 type="submit"
                 data-testid="button-continue"
                 className="px-8"
+                disabled={leadMutation.isPending}
               >
-                Create My PRO Account
+                {leadMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create My PRO Account"
+                )}
               </Button>
             </div>
           </form>

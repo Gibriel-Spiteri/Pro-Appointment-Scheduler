@@ -382,6 +382,7 @@ export default function Home() {
             state: reg.state,
             zip: reg.zip,
             password: reg.password,
+            netsuiteCustomerId: reg.netsuiteCustomerId,
           };
         } catch {}
       }

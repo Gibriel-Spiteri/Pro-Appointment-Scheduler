@@ -34,6 +34,23 @@ export const insertAppointmentSchema = createInsertSchema(appointments).omit({
   status: true,
 });
 
+export const createLeadSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  mobile: z.string().min(10, "Please enter a valid phone number"),
+  businessName: z.string().min(1, "Business name is required"),
+  businessType: z.string().min(1, "Please select a business type"),
+  annualProjects: z.string().min(1, "Please select an option"),
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  zip: z.string().min(5, "Please enter a valid ZIP code"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export type CreateLead = z.infer<typeof createLeadSchema>;
+
 export const bookAppointmentSchema = z.object({
   customerName: z.string().min(2, "Name must be at least 2 characters"),
   businessName: z.string().min(1, "Business name is required"),
@@ -54,6 +71,7 @@ export const bookAppointmentSchema = z.object({
   state: z.string().optional(),
   zip: z.string().optional(),
   password: z.string().optional(),
+  netsuiteCustomerId: z.string().optional(),
 });
 
 

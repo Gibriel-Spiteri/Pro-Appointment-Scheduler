@@ -4,6 +4,63 @@ import { log } from "./index";
 const APPOINTMENT_RESTLET_SCRIPT_ID = process.env.APPOINTMENT_RESTLET_SCRIPT_ID || "";
 const APPOINTMENT_RESTLET_DEPLOY_ID = process.env.APPOINTMENT_RESTLET_DEPLOY_ID || "";
 
+const LEAD_RESTLET_SCRIPT_ID = process.env.LEAD_RESTLET_SCRIPT_ID || "";
+const LEAD_RESTLET_DEPLOY_ID = process.env.LEAD_RESTLET_DEPLOY_ID || "";
+
+export function isLeadRestletConfigured(): boolean {
+  return !!(LEAD_RESTLET_SCRIPT_ID && LEAD_RESTLET_DEPLOY_ID);
+}
+
+export async function createLeadViaRestlet(params: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobile: string;
+  businessName: string;
+  businessType: string;
+  annualProjects: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  password: string;
+}): Promise<{ success: boolean; customerId?: string; error?: string }> {
+  if (!isLeadRestletConfigured()) {
+    log("Lead RESTlet not configured — skipping Lead creation. Set LEAD_RESTLET_SCRIPT_ID and LEAD_RESTLET_DEPLOY_ID environment variables.", "restlet");
+    return { success: false, error: "Lead RESTlet not configured" };
+  }
+
+  try {
+    const result = await callRestlet(LEAD_RESTLET_SCRIPT_ID, LEAD_RESTLET_DEPLOY_ID, "POST", {
+      action: "createLead",
+      firstName: params.firstName,
+      lastName: params.lastName,
+      email: params.email,
+      mobile: params.mobile.replace(/\D/g, ""),
+      businessName: params.businessName,
+      businessType: params.businessType,
+      annualProjects: params.annualProjects,
+      address: params.address,
+      city: params.city,
+      state: params.state,
+      zip: params.zip,
+      password: params.password,
+    });
+
+    if (result.success) {
+      const customerId = result.data?.customerId ? String(result.data.customerId) : undefined;
+      log(`Lead RESTlet succeeded — customerId: ${customerId || "none"}`, "restlet");
+      return { success: true, customerId };
+    } else {
+      log(`Lead RESTlet failed: ${result.error}`, "restlet");
+      return { success: false, error: result.error };
+    }
+  } catch (error: any) {
+    log(`Error calling lead RESTlet: ${error.message}`, "restlet");
+    return { success: false, error: error.message };
+  }
+}
+
 export function isAppointmentRestletConfigured(): boolean {
   return !!(APPOINTMENT_RESTLET_SCRIPT_ID && APPOINTMENT_RESTLET_DEPLOY_ID);
 }
@@ -30,6 +87,7 @@ export async function createAppointmentViaRestlet(params: {
   state?: string;
   zip?: string;
   password?: string;
+  netsuiteCustomerId?: string;
 }): Promise<{ success: boolean; eventId?: string; emailSent?: boolean; error?: string }> {
   if (!isAppointmentRestletConfigured()) {
     log("Appointment RESTlet not configured — skipping calendar event and email. Set APPOINTMENT_RESTLET_SCRIPT_ID and APPOINTMENT_RESTLET_DEPLOY_ID environment variables.", "restlet");
@@ -60,6 +118,7 @@ export async function createAppointmentViaRestlet(params: {
       state: params.state,
       zip: params.zip,
       password: params.password,
+      netsuiteCustomerId: params.netsuiteCustomerId,
     });
 
     if (result.success) {
