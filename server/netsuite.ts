@@ -4,8 +4,7 @@ import jwt from "jsonwebtoken";
 import { log } from "./index";
 
 const NETSUITE_ACCOUNT_ID = process.env.NETSUITE_ACCOUNT_ID || "";
-const CLIENT_ID = process.env.NETSUITE_CLIENT_ID || "";
-const OIDC_CLIENT_ID = process.env.NETSUITE_OIDC_CLIENT_ID || "";
+const CONSUMER_KEY = process.env.NETSUITE_CONSUMER_KEY || "";
 const CERTIFICATE_ID = process.env.NETSUITE_CERTIFICATE_ID || process.env.CERTIFICATE_ID || "";
 
 const PRIVATE_KEY_PATH = path.resolve("server/certs/private_key.pem");
@@ -34,14 +33,10 @@ function getPrivateKey(): string {
   return fs.readFileSync(PRIVATE_KEY_PATH, "utf-8");
 }
 
-function getEffectiveClientId(): string {
-  return OIDC_CLIENT_ID || CLIENT_ID;
-}
-
 function createClientAssertion(): string {
   const privateKey = getPrivateKey();
   const tokenEndpoint = getTokenEndpoint();
-  const clientId = getEffectiveClientId();
+  const clientId = CONSUMER_KEY;
 
   const now = Math.floor(Date.now() / 1000);
   const payload = {
@@ -108,10 +103,9 @@ async function getAccessToken(): Promise<string> {
 }
 
 export function validateNetSuiteConfig(): { valid: boolean; missing: string[] } {
-  const effectiveClientId = getEffectiveClientId();
   const required: Record<string, string> = {
     NETSUITE_ACCOUNT_ID,
-    "NETSUITE_CLIENT_ID or NETSUITE_OIDC_CLIENT_ID": effectiveClientId,
+    NETSUITE_CONSUMER_KEY: CONSUMER_KEY,
     NETSUITE_CERTIFICATE_ID: CERTIFICATE_ID,
   };
 
