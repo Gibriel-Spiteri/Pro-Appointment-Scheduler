@@ -41,10 +41,10 @@ function createClientAssertion(): string {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: clientId,
-    scope: ["rest_webservices", "restlets"],
+    scope: "rest_webservices restlets",
     aud: tokenEndpoint,
     iat: now,
-    exp: now + 3600,
+    exp: now + 60,
   };
 
   log(`Creating JWT with iss=${clientId}, kid=${CERTIFICATE_ID}, alg=PS256`, "netsuite");
