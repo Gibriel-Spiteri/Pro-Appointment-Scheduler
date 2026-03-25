@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
+import { createPrivateKey, KeyObject } from "crypto";
 import { log } from "./index";
 
 const NETSUITE_ACCOUNT_ID = process.env.NETSUITE_ACCOUNT_ID || "";
@@ -29,7 +30,19 @@ function getTokenEndpoint(): string {
   return `${getBaseUrl()}/services/rest/auth/oauth2/v1/token`;
 }
 
-function getPrivateKey(): string {
+function getPrivateKey(): KeyObject | string {
+  const envKey = process.env.NETSUITE_PRIVATE_KEY;
+  if (envKey) {
+    const pem = envKey.replace(/\\n/g, "\n");
+    try {
+      const key = createPrivateKey(pem);
+      log("Using NETSUITE_PRIVATE_KEY env var for signing", "netsuite");
+      return key;
+    } catch {
+      log("NETSUITE_PRIVATE_KEY env var could not be parsed — falling back to private_key.pem file", "netsuite");
+    }
+  }
+  log("Using private_key.pem file for signing", "netsuite");
   return fs.readFileSync(PRIVATE_KEY_PATH, "utf-8");
 }
 
@@ -41,18 +54,19 @@ function createClientAssertion(): string {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: clientId,
+    sub: clientId,
     scope: "rest_webservices restlets",
     aud: tokenEndpoint,
     iat: now,
     exp: now + 60,
   };
 
-  log(`Creating JWT with iss=${clientId}, kid=${CERTIFICATE_ID}, alg=PS256`, "netsuite");
+  log(`Creating JWT with iss=${clientId}, kid=${CERTIFICATE_ID}, alg=RS256`, "netsuite");
 
   const token = jwt.sign(payload, privateKey, {
-    algorithm: "PS256" as any,
+    algorithm: "RS256",
     header: {
-      alg: "PS256",
+      alg: "RS256",
       typ: "JWT",
       kid: CERTIFICATE_ID,
     } as any,
