@@ -4,11 +4,8 @@ import { log } from "./index";
 const APPOINTMENT_RESTLET_SCRIPT_ID = process.env.APPOINTMENT_RESTLET_SCRIPT_ID || "";
 const APPOINTMENT_RESTLET_DEPLOY_ID = process.env.APPOINTMENT_RESTLET_DEPLOY_ID || "";
 
-const LEAD_RESTLET_SCRIPT_ID = process.env.LEAD_RESTLET_SCRIPT_ID || "";
-const LEAD_RESTLET_DEPLOY_ID = process.env.LEAD_RESTLET_DEPLOY_ID || "";
-
 export function isLeadRestletConfigured(): boolean {
-  return !!(LEAD_RESTLET_SCRIPT_ID && LEAD_RESTLET_DEPLOY_ID);
+  return !!(APPOINTMENT_RESTLET_SCRIPT_ID && APPOINTMENT_RESTLET_DEPLOY_ID);
 }
 
 export async function createLeadViaRestlet(params: {
@@ -26,12 +23,12 @@ export async function createLeadViaRestlet(params: {
   password: string;
 }): Promise<{ success: boolean; customerId?: string; error?: string }> {
   if (!isLeadRestletConfigured()) {
-    log("Lead RESTlet not configured — skipping Lead creation. Set LEAD_RESTLET_SCRIPT_ID and LEAD_RESTLET_DEPLOY_ID environment variables.", "restlet");
+    log("Lead RESTlet not configured — skipping Lead creation. Set APPOINTMENT_RESTLET_SCRIPT_ID and APPOINTMENT_RESTLET_DEPLOY_ID environment variables.", "restlet");
     return { success: false, error: "Lead RESTlet not configured" };
   }
 
   try {
-    const result = await callRestlet(LEAD_RESTLET_SCRIPT_ID, LEAD_RESTLET_DEPLOY_ID, "POST", {
+    const result = await callRestlet(APPOINTMENT_RESTLET_SCRIPT_ID, APPOINTMENT_RESTLET_DEPLOY_ID, "POST", {
       action: "createLead",
       firstName: params.firstName,
       lastName: params.lastName,
