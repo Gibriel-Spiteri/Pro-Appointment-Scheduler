@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
-import { createPrivateKey, KeyObject } from "crypto";
 import { log } from "./index";
 
 const NETSUITE_ACCOUNT_ID = process.env.NETSUITE_ACCOUNT_ID || "";
-const CONSUMER_KEY = process.env.NETSUITE_CONSUMER_KEY || "";
+const CLIENT_ID = process.env.NETSUITE_CLIENT_ID || "";
+const OIDC_CLIENT_ID = process.env.NETSUITE_OIDC_CLIENT_ID || "";
 const CERTIFICATE_ID = process.env.NETSUITE_CERTIFICATE_ID || process.env.CERTIFICATE_ID || "";
 
 const PRIVATE_KEY_PATH = path.resolve("server/certs/private_key.pem");
@@ -46,27 +46,30 @@ function getPrivateKey(): KeyObject | string {
   return fs.readFileSync(PRIVATE_KEY_PATH, "utf-8");
 }
 
+function getEffectiveClientId(): string {
+  return OIDC_CLIENT_ID || CLIENT_ID;
+}
+
 function createClientAssertion(): string {
   const privateKey = getPrivateKey();
   const tokenEndpoint = getTokenEndpoint();
-  const clientId = CONSUMER_KEY;
+  const clientId = getEffectiveClientId();
 
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: clientId,
-    sub: clientId,
-    scope: "rest_webservices restlets",
+    scope: ["rest_webservices", "restlets"],
     aud: tokenEndpoint,
     iat: now,
-    exp: now + 60,
+    exp: now + 3600,
   };
 
-  log(`Creating JWT with iss=${clientId}, kid=${CERTIFICATE_ID}, alg=RS256`, "netsuite");
+  log(`Creating JWT with iss=${clientId}, kid=${CERTIFICATE_ID}, alg=PS256`, "netsuite");
 
-  const token = jwt.sign(payload, privateKey, {
-    algorithm: "RS256",
+  const token = jwt.sign(payload, privateKey as string, {
+    algorithm: "PS256" as any,
     header: {
-      alg: "RS256",
+      alg: "PS256",
       typ: "JWT",
       kid: CERTIFICATE_ID,
     } as any,
@@ -117,9 +120,10 @@ async function getAccessToken(): Promise<string> {
 }
 
 export function validateNetSuiteConfig(): { valid: boolean; missing: string[] } {
+  const effectiveClientId = getEffectiveClientId();
   const required: Record<string, string> = {
     NETSUITE_ACCOUNT_ID,
-    NETSUITE_CONSUMER_KEY: CONSUMER_KEY,
+    "NETSUITE_CLIENT_ID or NETSUITE_OIDC_CLIENT_ID": effectiveClientId,
     NETSUITE_CERTIFICATE_ID: CERTIFICATE_ID,
   };
 
