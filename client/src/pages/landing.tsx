@@ -1,98 +1,148 @@
-import { Monitor, ShieldCheck, Zap, LogIn, Plus } from "lucide-react";
-
-export default function Landing() {
+export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#f0f0f0]">
-      <header className="bg-white border-b border-gray-200 px-5 py-4 flex items-center justify-between">
-        <span className="text-lg font-bold text-gray-900 whitespace-nowrap">
-          Consumers <span className="text-blue-600">PRO</span>
-        </span>
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <header className="w-full px-5 py-4 flex items-center justify-between border-b border-border bg-card">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-lg tracking-tight">
+            Consumers <span className="text-primary">PRO</span>
+          </span>
+        </div>
         <a
           href="https://www.ckbpro.com/portal"
-          target="_blank"
-          rel="noopener noreferrer"
-          data-testid="link-portal-login-header"
-          className="text-blue-600 text-sm font-medium hover:underline"
+          className="text-sm font-medium text-primary hover:underline underline-offset-4"
         >
           Portal Login
         </a>
       </header>
-
       <main className="flex-1 flex flex-col">
-        <div className="bg-white mx-0 mt-0 px-6 pt-16 pb-12 flex flex-col items-center text-center gap-6">
-          <div className="flex flex-col items-center gap-2">
-            <h1 className="text-3xl font-bold text-gray-900 leading-tight">
-              Welcome to
-            </h1>
-            <h2 className="text-3xl font-bold leading-tight">
-              <span className="text-blue-600">Consumers</span>{" "}
-              <span className="text-gray-900">PRO</span>
-            </h2>
-            <p className="text-sm text-gray-500 leading-relaxed max-w-[260px] mt-2">
-              Your trusted partner for wholesale purchasing. Access exclusive pricing, manage your account, and grow your business with us.
-            </p>
-          </div>
+        <section className="flex-1 flex flex-col items-center justify-center text-center px-5 py-16 gap-6">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-sm">
+            Welcome to<br />
+            <span className="whitespace-nowrap"><span className="text-primary">Consumers</span> <span className="text-foreground">PRO</span></span>
+          </h1>
 
-          <div className="w-full flex flex-col gap-3 mt-2">
+          <p className="text-muted-foreground text-base leading-relaxed max-w-xs">
+            Your trusted partner for wholesale purchasing. Access exclusive pricing, manage your account, and grow your business with us.
+          </p>
+
+          <div className="flex flex-col w-full max-w-xs gap-3 pt-2">
             <a
               href="https://www.ckbpro.com/portal"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="link-portal-login"
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm px-5 py-3.5 transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold py-3.5 px-6 rounded-xl text-sm shadow-sm hover:opacity-90 active:scale-[.98] transition-all"
             >
-              <LogIn className="w-4 h-4 flex-shrink-0" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                />
+              </svg>
               Log In to Your Portal
             </a>
 
             <a
               href="https://www.ckbpro.com/signup"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="link-wholesale-signup"
-              className="w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-800 font-semibold text-sm px-5 py-3.5 transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 bg-card border border-border text-foreground font-semibold py-3.5 px-6 rounded-xl text-sm shadow-sm hover:bg-secondary active:scale-[.98] transition-all"
             >
-              <Plus className="w-4 h-4 flex-shrink-0" />
+              <svg
+                className="w-4 h-4 text-primary"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
               Sign Up for Wholesale PROgram
             </a>
           </div>
-        </div>
+        </section>
 
-        <div className="flex-1 px-4 pt-10 pb-8">
-          <div className="grid grid-cols-3 gap-3">
-            <div
-              data-testid="card-wholesale-pricing"
-              className="bg-white rounded-xl border border-gray-200 flex flex-col items-center justify-center gap-2 p-4 text-center"
-            >
-              <Monitor className="w-6 h-6 text-blue-500" />
-              <span className="text-xs text-gray-600 font-medium leading-tight">Wholesale Pricing</span>
+        <section className="px-5 pb-12">
+          <div className="max-w-sm mx-auto grid grid-cols-3 gap-4">
+            <div className="flex flex-col items-center gap-1.5 bg-card border border-border rounded-2xl p-4 text-center">
+              <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-primary"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.75}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
+                  />
+                </svg>
+              </div>
+              <p className="text-[11px] font-medium text-muted-foreground leading-tight">Wholesale Pricing</p>
             </div>
-            <div
-              data-testid="card-trusted-program"
-              className="bg-white rounded-xl border border-gray-200 flex flex-col items-center justify-center gap-2 p-4 text-center"
-            >
-              <ShieldCheck className="w-6 h-6 text-blue-500" />
-              <span className="text-xs text-gray-600 font-medium leading-tight">Trusted Program</span>
+
+            <div className="flex flex-col items-center gap-1.5 bg-card border border-border rounded-2xl p-4 text-center">
+              <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-primary"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.75}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                  />
+                </svg>
+              </div>
+              <p className="text-[11px] font-medium text-muted-foreground leading-tight">Trusted Program</p>
             </div>
-            <div
-              data-testid="card-fast-access"
-              className="bg-white rounded-xl border border-gray-200 flex flex-col items-center justify-center gap-2 p-4 text-center"
-            >
-              <Zap className="w-6 h-6 text-blue-500" />
-              <span className="text-xs text-gray-600 font-medium leading-tight">Fast Access</span>
+
+            <div className="flex flex-col items-center gap-1.5 bg-card border border-border rounded-2xl p-4 text-center">
+              <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-primary"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.75}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+                  />
+                </svg>
+              </div>
+              <p className="text-[11px] font-medium text-muted-foreground leading-tight">Fast Access</p>
             </div>
           </div>
-        </div>
+        </section>
       </main>
-
-      <footer className="bg-white border-t border-gray-200 px-5 py-5 text-center">
-        <p className="text-xs text-gray-500 mb-2">
+      <footer className="border-t border-border bg-card px-5 py-5 text-center">
+        <p className="text-xs text-muted-foreground">
           &copy; {new Date().getFullYear()} Consumers PRO. All rights reserved.
         </p>
-        <div className="flex items-center justify-center gap-4">
-          <a href="#" className="text-xs text-gray-500 hover:text-gray-700">Privacy Policy</a>
-          <a href="#" className="text-xs text-gray-500 hover:text-gray-700">Terms of Service</a>
-          <a href="#" className="text-xs text-gray-500 hover:text-gray-700">Contact</a>
+        <div className="flex items-center justify-center gap-4 mt-2">
+          <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Privacy Policy
+          </a>
+          <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Terms of Service
+          </a>
+          <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Contact
+          </a>
         </div>
       </footer>
     </div>
