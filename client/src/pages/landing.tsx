@@ -1,3 +1,5 @@
+import { Link } from "wouter";
+
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -46,8 +48,8 @@ export default function Home() {
               Log In to Your Portal
             </a>
 
-            <a
-              href="https://www.ckbpro.com/signup"
+            <Link
+              href="/signup"
               className="w-full inline-flex items-center justify-center gap-2 bg-card border border-border text-foreground font-semibold py-3.5 px-6 rounded-xl text-sm shadow-sm hover:bg-secondary active:scale-[.98] transition-all"
             >
               <svg
@@ -64,7 +66,7 @@ export default function Home() {
                 />
               </svg>
               Sign Up for Wholesale PROgram
-            </a>
+            </Link>
           </div>
         </section>
 
