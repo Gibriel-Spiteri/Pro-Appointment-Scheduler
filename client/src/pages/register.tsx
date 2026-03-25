@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useLocation } from "wouter";
-import { User, Building2, Mail, Phone, MapPin, Briefcase, Lock } from "lucide-react";
+import { useLocation, Link } from "wouter";
+import { User, Building2, Mail, Phone, MapPin, Briefcase, Lock, ChevronLeft } from "lucide-react";
 import headerImg from "@assets/Consumers_Wholesale_1773370886421.jpg";
 import {
   Form,
@@ -105,6 +105,16 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="max-w-3xl mx-auto w-full px-5 py-5 flex-1">
+        <div className="mb-4">
+          <Link
+            href="/"
+            data-testid="link-back-home"
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline underline-offset-4"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back
+          </Link>
+        </div>
         <div className="mb-5 rounded-lg border border-border bg-card overflow-hidden">
           <div className="px-3 py-3 border-b border-border bg-muted/40 flex items-center justify-center">
             <p className="text-center text-[#01426a] font-extrabold text-[20px]" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900 }}>
