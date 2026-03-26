@@ -10,7 +10,7 @@ export default function Home() {
           </span>
         </div>
         <a
-          href="https://www.ckbpro.com/portal"
+          href="https://ckbproportal.com"
           className="text-sm font-medium text-primary hover:underline underline-offset-4"
         >
           Portal Login
@@ -29,7 +29,7 @@ export default function Home() {
 
           <div className="flex flex-col w-full max-w-xs gap-3 pt-2">
             <a
-              href="https://www.ckbpro.com/portal"
+              href="https://ckbproportal.com"
               className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold py-3.5 px-6 rounded-xl text-sm shadow-sm hover:opacity-90 active:scale-[.98] transition-all"
             >
               <svg
